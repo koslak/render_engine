@@ -51,6 +51,12 @@ set(CORE_HEADERS
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})
 
+file(GLOB TEST_SOURCE
+    src/tests/test.cpp
+    src/tests/performance_test.cpp
+    src/tests/main.cpp
+  )
+
 include_directories(src)
 
 ######################################################################################
@@ -70,9 +76,38 @@ endif()
 add_executable(${PROJECT_CODE_NAME}_executable src/main/main.cpp)
 
 # You must build your code with position independent code (i.e., use the fPIC flag for the library)
-# if Qt was built with -reduce-relocations.
+# if Qt was built with -reduce-relocations
 target_compile_options(${PROJECT_CODE_NAME}_library PRIVATE -fPIC)
 
 target_link_libraries(${PROJECT_CODE_NAME}_executable            # target
                       PUBLIC ${PROJECT_CODE_NAME}_library        # item: library
                       PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)    # item: library
+
+######################################################################################
+# Google Test Framework
+######################################################################################
+# Prevent GoogleTest from overriding our compiler/linker options when building with Visual Studio
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+add_subdirectory(src/ext/google/googletest)
+include_directories(src/ext/google/googletest/googletest/src ${CMAKE_SOURCE_DIR}/src/ext/google/googletest/googletest/src)
+
+######################################################################################
+# Google Benchmark Framework
+######################################################################################
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark testing" FORCE)
+set(BENCHMARK_ENABLE_EXCEPTIONS OFF CACHE BOOL "Disable benchmark exceptions" FORCE)
+set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "Don't install benchmark" FORCE)
+set(BENCHMARK_DOWNLOAD_DEPENDENCIES OFF CACHE BOOL "Don't download dependencies" FORCE)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Disable Google Test in benchmark" FORCE)
+
+add_subdirectory(src/ext/google/benchmark)
+include_directories(src/ext/google/benchmark/src ${CMAKE_SOURCE_DIR}/src/ext/google/benchmark)
+
+add_executable(${PROJECT_CODE_NAME}_tests ${TEST_SOURCE})
+target_link_libraries(${PROJECT_CODE_NAME}_tests ${PROJECT_CODE_NAME}_library gtest benchmark::benchmark)
+
+######################################################################################
+# Adding CMAKE Test
+######################################################################################
+add_test(test_name ${PROJECT_CODE_NAME}_tests)
