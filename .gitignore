@@ -74,3 +74,5 @@ Thumbs.db
 build/
 
 /CMakeLists.txt.user
+/src/ext/google/googletest
+/src/ext/google/benchmark
