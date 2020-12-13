@@ -43,10 +43,12 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 set(CORE_SOURCE
     src/main/main.cpp
     src/gui/main_window.cpp
+    src/gui/render_widget.cpp
   )
 
 set(CORE_HEADERS
     src/gui/main_window.h
+    src/gui/render_widget.h
   )
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})
