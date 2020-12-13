@@ -44,11 +44,14 @@ set(CORE_SOURCE
     src/main/main.cpp
     src/gui/main_window.cpp
     src/gui/render_widget.cpp
+    src/core/vector3d.cpp
   )
 
 set(CORE_HEADERS
     src/gui/main_window.h
     src/gui/render_widget.h
+    src/core/vector3d.h
+    src/core/dfl.h
   )
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})
@@ -57,6 +60,7 @@ file(GLOB TEST_SOURCE
     src/tests/test.cpp
     src/tests/performance_test.cpp
     src/tests/main.cpp
+    src/tests/vector3d_tests.cpp
   )
 
 include_directories(src)
