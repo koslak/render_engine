@@ -23,5 +23,6 @@ int main(int argc, char *argv[])
     main_window.setWindowTitle("Render Engine Scene Editor");
     main_window.setGeometry(window_size);
     main_window.show();
+
     return a.exec();
 }

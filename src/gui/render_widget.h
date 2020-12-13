@@ -13,7 +13,8 @@ public slots:
     void refresh() noexcept;
 
 protected:
-    virtual void paintEvent(QPaintEvent *event);
+    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
     std::unique_ptr<QImage> image;

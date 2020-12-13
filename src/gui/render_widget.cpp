@@ -5,10 +5,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-Render_widget::Render_widget(QWidget *parent) : QWidget(parent),
-                                                image{std::make_unique<QImage>(QSize(150, 150), QImage::Format_ARGB32)},
-                                                width_image{150},
-                                                height_image{150}
+Render_widget::Render_widget(QWidget *parent) : QWidget(parent), image{std::make_unique<QImage>(QSize(1, 1), QImage::Format_ARGB32)}, width_image{1}, height_image{1}
 {
 }
 
@@ -26,6 +23,14 @@ void Render_widget::paintEvent(QPaintEvent *event)
     painter.drawImage(exposedRect, *image, exposedRect);
 }
 
+void Render_widget::resizeEvent(QResizeEvent *event)
+{
+    width_image = event->size().width();
+    height_image = event->size().height();
+
+    image.reset(new QImage(QSize(width_image, height_image), QImage::Format_ARGB32));
+}
+
 void Render_widget::refresh() noexcept
 {
     if (!image)
@@ -33,19 +38,23 @@ void Render_widget::refresh() noexcept
         return;
     }
 
-    uint32_t w = static_cast<uint32_t>(image->width());
-    uint32_t h = static_cast<uint32_t>(image->height());
+    /*
+    uint32_t width = static_cast<uint32_t>(image->width());
+    uint32_t height = static_cast<uint32_t>(image->height());
+
+    qDebug() << "width: " << width << "Height: " << height;
+    */
     QRgb *pixels = reinterpret_cast<QRgb *>(image->bits());
 
     uint32_t idx = 0;
 
-    for (uint32_t y = 0; y < h; ++y)
+    for (uint32_t y = 0; y < height_image; ++y)
     {
-        for (uint32_t x = 0; x < w; ++x, ++idx)
+        for (uint32_t x = 0; x < width_image; ++x, ++idx)
         {
             // To be called when the Scene class is defined.
             //pixels[idx] = tonemap(scene->camera()->get(x, y));
-            pixels[idx] = qRgb(80, 0, 0);
+            pixels[ idx ] = qRgb(80, 0, 0);
         }
     }
 
