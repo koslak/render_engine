@@ -38,23 +38,18 @@ void Render_widget::refresh() noexcept
         return;
     }
 
-    /*
-    uint32_t width = static_cast<uint32_t>(image->width());
-    uint32_t height = static_cast<uint32_t>(image->height());
-
-    qDebug() << "width: " << width << "Height: " << height;
-    */
     QRgb *pixels = reinterpret_cast<QRgb *>(image->bits());
 
-    uint32_t idx = 0;
+    uint32_t idx{ 0 };
+    const uint32_t total_pixels_image{ width_image * height_image };
 
     for (uint32_t y = 0; y < height_image; ++y)
     {
         for (uint32_t x = 0; x < width_image; ++x, ++idx)
         {
-            // To be called when the Scene class is defined.
-            //pixels[idx] = tonemap(scene->camera()->get(x, y));
             pixels[ idx ] = qRgb(80, 0, 0);
+
+            emit renderer_progress( idx * 100 / total_pixels_image );
         }
     }
 

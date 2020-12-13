@@ -12,6 +12,9 @@ public:
 public slots:
     void refresh() noexcept;
 
+signals:
+    void renderer_progress(const int &step);
+
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -21,6 +24,7 @@ private:
 
     uint32_t width_image;
     uint32_t height_image;
+    int render_progress{ 0 };
 };
 
 #endif // RENDER_WIDGET_H
