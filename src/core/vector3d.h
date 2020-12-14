@@ -22,8 +22,8 @@ class Vector3d
 {
 
 public:
-    Vector3d() { x = y = z = 0; }
-    Vector3d(T x, T y, T z) : x(x), y(y), z(z) { /*DCHECK(!HasNaNs());*/ }
+    Vector3d() { x = y = z = 0.0; }
+    Vector3d(T x, T y, T z) : x(x), y(y), z(z) {}
 
     bool HasNaNs() const noexcept
     {
@@ -32,7 +32,7 @@ public:
 
     Vector3d<T> operator +(const Vector3d<T> &v) const noexcept
     {
-        return Vector3d<T>{ x + v.x, y + v.y, z + v.z };
+        return Vector3d<T>( x + v.x, y + v.y, z + v.z );
     }
 
     Vector3d<T> &operator +=(const Vector3d<T> &v) noexcept
@@ -46,7 +46,7 @@ public:
 
     Vector3d<T> operator -(const Vector3d<T> &v) const noexcept
     {
-        return Vector3d<T>{ x - v.x, y - v.y, z - v.z };
+        return Vector3d<T>( x - v.x, y - v.y, z - v.z );
     }
 
     Vector3d<T> &operator -=(const Vector3d<T> &v) noexcept
@@ -71,7 +71,7 @@ public:
     template <typename U>
     Vector3d<T> operator *(U s) const noexcept
     {
-        return Vector3d<T>{ s * x, s * y, s * z };
+        return Vector3d<T>( s * x, s * y, s * z );
     }
 
     template <typename U>
@@ -90,7 +90,7 @@ public:
         assertm(f != 0, "The parameter f is zero. Division by zero is not allowed");
         double inv = static_cast<double>(1) / f;
 
-        return Vector3d<T>{x * inv, y * inv, z * inv};
+        return Vector3d<T>(x * inv, y * inv, z * inv);
     }
 
     template <typename U>
@@ -168,7 +168,7 @@ inline Vector3d<T> cross(const Vector3d<T> &v1, const Vector3d<T> &v2)
 template <typename T>
 inline Vector3d<T> normalize(const Vector3d<T> &v)
 {
-    return v / v.Length();
+    return v / v.length();
 }
 
 } // namespace DFL

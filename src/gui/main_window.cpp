@@ -9,6 +9,8 @@
 
 #include <memory>
 
+#include "core/geometry.h"
+
 Main_window::Main_window(QWidget *parent) : QMainWindow(parent), render_widget{new Render_widget(this)},
                                                                  progress_bar{new QProgressBar(this)},
                                                                  render_button{new QPushButton("Render Button")}
@@ -27,6 +29,8 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), render_widget{n
 
     QObject::connect(render_button, &QPushButton::clicked, this, &Main_window::render_button_clicked);
     QObject::connect(render_widget, &Render_widget::renderer_progress, this, &Main_window::update_render_progress);
+
+    DFL::Color a;
 }
 
 void Main_window::render_button_clicked()

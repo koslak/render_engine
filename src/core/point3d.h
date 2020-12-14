@@ -186,6 +186,13 @@ inline double distance_squared(const Point3d<T> &p1, const Point3d<T> &p2)
     return (p1 - p2).length_squared();
 }
 
+// Linear Interpolation
+template <typename T>
+Point3d<T> lerp(double t, const Point3d<T> &p0, const Point3d<T> &p1)
+{
+    return (1 - t) * p0 + t * p1;
+}
+
 template <typename T, typename U>
 inline Point3d<T> operator*(U f, const Point3d<T> &p)
 {
