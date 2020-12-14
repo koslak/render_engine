@@ -87,7 +87,7 @@ public:
     template <typename U>
     Vector3d<T> operator /(U f) const noexcept
     {
-        CHECK_NE(f, 0);
+        assertm(f != 0, "The parameter f is zero. Division by zero is not allowed");
         double inv = static_cast<double>(1) / f;
 
         return Vector3d<T>{x * inv, y * inv, z * inv};
@@ -96,7 +96,7 @@ public:
     template <typename U>
     Vector3d<T> &operator/=(U f) noexcept
     {
-        CHECK_NE(f, 0);
+        assertm(f != 0, "The parameter f is zero. Division by zero is not allowed");
         double inv = static_cast<double>(1) / f;
 
         x *= inv;
@@ -124,6 +124,52 @@ public:
     // Public data
     T x, y, z;
 };
+
+template <typename T, typename U>
+inline Vector3d<T> operator*(U f, const Vector3d<T> &v)
+{
+    return v * f;
+}
+
+template <typename T>
+inline std::ostream &operator<<(std::ostream &os, const Vector3d<T> &v)
+{
+    os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
+
+    return os;
+}
+
+template <typename T>
+inline T dot(const Vector3d<T> &v1, const Vector3d<T> &v2)
+{
+    assert(!v1.HasNaNs() && !v2.HasNaNs());
+
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+template <typename T>
+inline T absolute_dot(const Vector3d<T> &v1, const Vector3d<T> &v2)
+{
+    assert(!v1.HasNaNs() && !v2.HasNaNs());
+
+    return std::abs(Dot(v1, v2));
+}
+
+template <typename T>
+inline Vector3d<T> cross(const Vector3d<T> &v1, const Vector3d<T> &v2)
+{
+    assert(!v1.HasNaNs() && !v2.HasNaNs());
+    double v1x = v1.x, v1y = v1.y, v1z = v1.z;
+    double v2x = v2.x, v2y = v2.y, v2z = v2.z;
+
+    return Vector3d<T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z), (v1x * v2y) - (v1y * v2x));
+}
+
+template <typename T>
+inline Vector3d<T> normalize(const Vector3d<T> &v)
+{
+    return v / v.Length();
+}
 
 } // namespace DFL
 
