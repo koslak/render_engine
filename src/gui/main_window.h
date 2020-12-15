@@ -20,6 +20,9 @@ public slots:
     void render_button_clicked();
     void update_render_progress(const int &step);
 
+signals:
+    void update_progress_bar(const int &step);
+
 private:
     Render_widget *render_widget;
     QProgressBar *progress_bar;

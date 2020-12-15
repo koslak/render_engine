@@ -15,6 +15,7 @@ public:
     constexpr int image_height() const noexcept{ return static_cast<int>(height_image); };
 
     void refresh(const std::vector<DFL::Color> &image_pixels) noexcept;
+    QImage * get_image(){ return image.get(); };
 
 signals:
     void renderer_progress(const int &step);
