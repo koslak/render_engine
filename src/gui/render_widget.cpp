@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 
+
 Render_widget::Render_widget(QWidget *parent) : QWidget(parent), image{std::make_unique<QImage>(QSize(1, 1), QImage::Format_ARGB32)}, width_image{1}, height_image{1}
 {
 }
@@ -31,7 +32,7 @@ void Render_widget::resizeEvent(QResizeEvent *event)
     image.reset(new QImage(QSize(width_image, height_image), QImage::Format_ARGB32));
 }
 
-void Render_widget::refresh() noexcept
+void Render_widget::refresh(const std::vector<DFL::Color> &image_pixels) noexcept
 {
     if (!image)
     {
@@ -42,12 +43,14 @@ void Render_widget::refresh() noexcept
 
     uint32_t idx{ 0 };
     const uint32_t total_pixels_image{ width_image * height_image };
+    DFL::Color color{ 0.0, 0.0, 0.0 };
 
     for (uint32_t y = 0; y < height_image; ++y)
     {
         for (uint32_t x = 0; x < width_image; ++x, ++idx)
         {
-            pixels[ idx ] = qRgb(80, 0, 0);
+            color = image_pixels[ idx ];
+            pixels[ idx ] = qRgb(color.x, color.y, color.z);
 
             emit renderer_progress( idx * 100 / total_pixels_image );
         }

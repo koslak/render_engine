@@ -7,6 +7,8 @@ class Render_widget;
 class QPushButton;
 class QProgressBar;
 
+#include "cameras/camera.h"
+
 class Main_window : public QMainWindow
 {
     Q_OBJECT
@@ -22,6 +24,8 @@ private:
     Render_widget *render_widget;
     QProgressBar *progress_bar;
     QPushButton *render_button;
+
+    std::unique_ptr<DFL::Camera> camera;
 };
 
 #endif // MAIN_WINDOW_H

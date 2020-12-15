@@ -3,14 +3,18 @@
 
 #include <QWidget>
 
+#include "core/geometry.h"
+
 class Render_widget : public QWidget
 {
     Q_OBJECT
 public:
     explicit Render_widget(QWidget *parent = nullptr);
 
-public slots:
-    void refresh() noexcept;
+    constexpr int image_width() const noexcept{ return static_cast<int>(width_image); };
+    constexpr int image_height() const noexcept{ return static_cast<int>(height_image); };
+
+    void refresh(const std::vector<DFL::Color> &image_pixels) noexcept;
 
 signals:
     void renderer_progress(const int &step);

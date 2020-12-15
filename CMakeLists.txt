@@ -46,6 +46,7 @@ set(CORE_SOURCE
     src/gui/render_widget.cpp
     src/core/vector3d.cpp
     src/core/point3d.cpp
+    src/cameras/camera.cpp
   )
 
 set(CORE_HEADERS
@@ -56,6 +57,7 @@ set(CORE_HEADERS
     src/core/dfl.h
     src/core/geometry.h
     src/core/ray.h
+    src/cameras/camera.h
   )
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})
