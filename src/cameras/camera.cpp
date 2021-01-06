@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <QDebug>
+
 namespace DFL {
 
 Camera::Camera()
@@ -13,10 +15,14 @@ Camera::Camera()
     horizontal = DFL::Vector3d<double>{ viewport_width, 0, 0 };
     vertical = DFL::Vector3d<double>(0, viewport_height, 0);
     lower_left_corner = origin - horizontal/2 - vertical/2 - DFL::Vector3d<double>(0, 0, focal_length);
+
+    qDebug() << "lower_left_corner: " << lower_left_corner.x << lower_left_corner.y << lower_left_corner.z;
 }
 
 Ray Camera::get_ray(double u, double v) const noexcept
 {
+//    DFL::Ray ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+//    qDebug() << "ray: o: [" << ray.origin.x << ", " << ray.origin.y << ", " << ray.origin.z << "] direction: [" << ray.direction.x << ", " << ray.direction.y << ", " << ray.direction.z << "]";
     return DFL::Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 }
 

@@ -95,6 +95,13 @@ target_link_libraries(${PROJECT_CODE_NAME}_executable            # target
                       PUBLIC ${PROJECT_CODE_NAME}_library        # item: library
                       PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)    # item: library
 
+
+######################################################################################
+# Boost Library
+######################################################################################
+set(BOOST_ROOT "/usr/include/boost")
+include_directories(include)
+
 ######################################################################################
 # Google Test Framework
 ######################################################################################
