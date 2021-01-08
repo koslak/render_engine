@@ -3,33 +3,31 @@
 
 #include <QWidget>
 
+#include "cameras/camera.h"
 #include "core/geometry.h"
+#include "core/render_thread.h"
 
 class Render_widget : public QWidget
 {
     Q_OBJECT
 public:
     explicit Render_widget(QWidget *parent = nullptr);
-
-    constexpr int image_width() const noexcept{ return static_cast<int>(width_image); };
-    constexpr int image_height() const noexcept{ return static_cast<int>(height_image); };
-
-    void refresh(const std::vector<DFL::Color> &image_pixels) noexcept;
-    QImage * get_image(){ return image.get(); };
-
-signals:
-    void renderer_progress(const int &step);
+    void start_render_image() noexcept;
 
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
+private slots:
+    void update_image(const QImage &image, int progress);
+
 private:
+    Render_thread render_thread;
+
     std::unique_ptr<QImage> image;
 
-    uint32_t width_image;
-    uint32_t height_image;
-    int render_progress{ 0 };
+    uint32_t image_width{ 1 };
+    uint32_t image_height{ 1 };
 };
 
 #endif // RENDER_WIDGET_H

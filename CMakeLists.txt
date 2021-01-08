@@ -46,6 +46,7 @@ set(CORE_SOURCE
     src/gui/render_widget.cpp
     src/core/vector3d.cpp
     src/core/point3d.cpp
+    src/core/render_thread.cpp
     src/cameras/camera.cpp
   )
 
@@ -57,6 +58,7 @@ set(CORE_HEADERS
     src/core/dfl.h
     src/core/geometry.h
     src/core/ray.h
+    src/core/render_thread.h
     src/cameras/camera.h
   )
 

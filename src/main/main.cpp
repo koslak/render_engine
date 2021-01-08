@@ -7,6 +7,8 @@
 #include <boost/type_index.hpp>
 #include <boost/config.hpp>
 
+#include <iostream>
+
 template<typename T>
 void print_type_name(const T &parameter)
 {
@@ -27,7 +29,6 @@ int main(int argc, char *argv[])
     {
         if(screen)
         {
-            print_type_name(screen);
             bool is_screen_name_strings_equal = QString::compare(screen->name(), QGuiApplication::primaryScreen()->name(), Qt::CaseInsensitive);
             if(is_screen_name_strings_equal)
             {

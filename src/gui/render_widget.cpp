@@ -4,16 +4,21 @@
 #include <QImage>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QPixmap>
 
+#include <memory>
 
-Render_widget::Render_widget(QWidget *parent) : QWidget(parent), image{std::make_unique<QImage>(QSize(1, 1), QImage::Format_ARGB32)}, width_image{1}, height_image{1}
+#include "core/geometry.h"
+
+Render_widget::Render_widget(QWidget *parent) : QWidget(parent), image{std::make_unique<QImage>(QSize(1, 1), QImage::Format_ARGB32)}
 {
+    connect(&render_thread, &Render_thread::rendered_image, this, &Render_widget::update_image);
 }
 
 void Render_widget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.fillRect(0, 0, width(), height(), QColor(Qt::darkGray));
+//    painter.fillRect(0, 0, width(), height(), QColor(Qt::darkGray));
 
     if (!image)
     {
@@ -26,35 +31,18 @@ void Render_widget::paintEvent(QPaintEvent *event)
 
 void Render_widget::resizeEvent(QResizeEvent *event)
 {
-    width_image = event->size().width();
-    height_image = event->size().height();
+    this->image_width = event->size().width();
+    this->image_height = event->size().height();
 
-    image.reset(new QImage(QSize(width_image, height_image), QImage::Format_ARGB32));
+    image.reset(new QImage(QSize(image_width, image_height), QImage::Format_ARGB32));
 }
 
-void Render_widget::refresh(const std::vector<DFL::Color> &image_pixels) noexcept
+void Render_widget::update_image(const QImage &image, int progress)
 {
-    if (!image)
-    {
-        return;
-    }
 
-    QRgb *pixels = reinterpret_cast<QRgb *>(image->bits());
+}
 
-    uint32_t idx{ 0 };
-    const uint32_t total_pixels_image{ width_image * height_image };
-    DFL::Color color{ 0.0, 0.0, 0.0 };
-
-    for (uint32_t y = 0; y < height_image; ++y)
-    {
-        for (uint32_t x = 0; x < width_image; ++x, ++idx)
-        {
-            color = image_pixels[ idx ];
-            pixels[ idx ] = qRgb(color.x, color.y, color.z);
-
-            emit renderer_progress( idx * 100 / total_pixels_image );
-        }
-    }
-
-    update();
+void Render_widget::start_render_image() noexcept
+{
+    render_thread.render(image_width, image_height);
 }

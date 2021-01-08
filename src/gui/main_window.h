@@ -3,11 +3,9 @@
 
 #include <QMainWindow>
 
-class Render_widget;
 class QPushButton;
 class QProgressBar;
-
-#include "cameras/camera.h"
+class Render_widget;
 
 class Main_window : public QMainWindow
 {
@@ -18,17 +16,12 @@ public:
 
 public slots:
     void render_button_clicked();
-    void update_render_progress(const int &step);
-
-signals:
-    void update_progress_bar(const int &step);
 
 private:
-    Render_widget *render_widget;
     QProgressBar *progress_bar;
     QPushButton *render_button;
 
-    std::unique_ptr<DFL::Camera> camera;
+    Render_widget *render_widget;
 };
 
 #endif // MAIN_WINDOW_H
