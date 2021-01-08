@@ -10,23 +10,24 @@
 
 #include "core/geometry.h"
 
-Render_widget::Render_widget(QWidget *parent) : QWidget(parent), image{std::make_unique<QImage>(QSize(1, 1), QImage::Format_ARGB32)}
+Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
 {
     connect(&render_thread, &Render_thread::rendered_image, this, &Render_widget::update_image);
 }
 
-void Render_widget::paintEvent(QPaintEvent *event)
+void Render_widget::paintEvent(QPaintEvent */*event*/)
 {
     QPainter painter(this);
-//    painter.fillRect(0, 0, width(), height(), QColor(Qt::darkGray));
+    painter.fillRect(0, 0, width(), height(), QColor(Qt::darkGray));
 
-    if (!image)
+    if(pixmap.isNull())
     {
-        return;
+        painter.setPen(Qt::white);
+        painter.drawText(rect(), Qt::AlignCenter, tr("Rendering image, please wait..."));
     }
 
-    QRect exposedRect = painter.matrix().inverted().mapRect(event->rect()).adjusted(-1, -1, 1, 1);
-    painter.drawImage(exposedRect, *image, exposedRect);
+    QRectF exposed = painter.transform().inverted().mapRect(rect()).adjusted(-1, -1, 1, 1);
+    painter.drawPixmap(exposed, pixmap, exposed);
 }
 
 void Render_widget::resizeEvent(QResizeEvent *event)
@@ -34,12 +35,17 @@ void Render_widget::resizeEvent(QResizeEvent *event)
     this->image_width = event->size().width();
     this->image_height = event->size().height();
 
-    image.reset(new QImage(QSize(image_width, image_height), QImage::Format_ARGB32));
+    QImage resized_image{ QImage(QSize(image_width, image_height), QImage::Format_ARGB32) };
+    pixmap = QPixmap::fromImage(resized_image);
 }
 
 void Render_widget::update_image(const QImage &image, int progress)
 {
+    pixmap = QPixmap::fromImage(image);
 
+    emit update_progress_bar(progress);
+
+    update();
 }
 
 void Render_widget::start_render_image() noexcept

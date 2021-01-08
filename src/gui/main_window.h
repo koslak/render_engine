@@ -16,6 +16,7 @@ public:
 
 public slots:
     void render_button_clicked();
+    void update_progress_bar(int progress);
 
 private:
     QProgressBar *progress_bar;

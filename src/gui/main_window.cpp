@@ -20,6 +20,7 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
     vertical_layout->addWidget(progress_bar);
 
     QObject::connect(render_button, &QPushButton::clicked, this, &Main_window::render_button_clicked);
+    QObject::connect(render_widget, &Render_widget::update_progress_bar, this, &Main_window::update_progress_bar);
 
     central_widget->setLayout(vertical_layout);
     this->setCentralWidget(central_widget);
@@ -28,5 +29,10 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
 void Main_window::render_button_clicked()
 {
     render_widget->start_render_image();
+}
+
+void Main_window::update_progress_bar(int progress)
+{
+    progress_bar->setValue(progress);
 }
 

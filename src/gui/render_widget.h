@@ -18,14 +18,16 @@ protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
+signals:
+    void update_progress_bar(int progress);
+
 private slots:
     void update_image(const QImage &image, int progress);
 
 private:
     Render_thread render_thread;
 
-    std::unique_ptr<QImage> image;
-
+    QPixmap pixmap;
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
 };
