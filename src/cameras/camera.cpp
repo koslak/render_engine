@@ -40,9 +40,12 @@ bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r)
 // the "y" coordinate after scaling the ray direction to unit length.
 Color Camera::ray_color(const Ray& ray) noexcept
 {
-    if(hit_sphere(DFL::Point3d<double>(0,0,-1), 0.5, ray))
+    if(hit_sphere(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.3, ray))
     {
-        return Color(1.0, 0.0, 0.0);
+        Color sphere_color{1.0, 0.0, 0.0};
+        sphere_color *= 255.999;
+
+        return sphere_color;
     }
 
     Vector3d<double> unit_direction = normalize(ray.direction);
