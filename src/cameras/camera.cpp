@@ -24,13 +24,13 @@ Ray Camera::get_ray(double u, double v) const noexcept
     return DFL::Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 }
 
-bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r)
+bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r) noexcept
 {
     DFL::Vector3d<double> oc = r.origin - center;
     auto a = dot(r.direction, r.direction);
     auto b = 2.0 * dot(oc, r.direction);
-    auto c = dot(oc, oc) - radius*radius;
-    auto discriminant = b*b - 4*a*c;
+    auto c = dot(oc, oc) - radius * radius;
+    auto discriminant = b * b - 4 * a * c;
 
     return (discriminant > 0);
 }
