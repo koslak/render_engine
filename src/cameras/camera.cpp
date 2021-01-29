@@ -24,7 +24,7 @@ Ray Camera::get_ray(double u, double v) const noexcept
     return DFL::Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 }
 
-bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r) noexcept
+double hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r) noexcept
 {
     DFL::Vector3d<double> oc = r.origin - center;
     auto a = dot(r.direction, r.direction);
@@ -32,7 +32,12 @@ bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r)
     auto c = dot(oc, oc) - radius * radius;
     auto discriminant = b * b - 4 * a * c;
 
-    return (discriminant > 0);
+    if(discriminant < 0)
+    {
+        return -1.0;
+    }else{
+        return (-b - std::sqrt(discriminant)) / (2.0 * a);
+    }
 }
 
 // Function that returns the color of the background (a simple gradient).
@@ -40,16 +45,20 @@ bool hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r)
 // the "y" coordinate after scaling the ray direction to unit length.
 Color Camera::ray_color(const Ray& ray) noexcept
 {
-    if(hit_sphere(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.3, ray))
+    double sphere_radius{0.5};
+    auto t = hit_sphere(DFL::Point3d<double>(0.0, 0.0, -1.0), sphere_radius, ray);
+    if(t > 0.0)
     {
-        Color sphere_color{1.0, 0.0, 0.0};
+        DFL::Point3d<double> N = normalize( ray(t) - DFL::Vector3d<double>(0.0, 0.0, -1.0) );
+        DFL::Color sphere_color{N.x + 1, N.y + 1, N.z + 1};
+        sphere_color *= 0.5;
         sphere_color *= 255.999;
 
         return sphere_color;
     }
 
     Vector3d<double> unit_direction = normalize(ray.direction);
-    auto t = 0.5 * (unit_direction.y + 1.0);
+    t = 0.5 * (unit_direction.y + 1.0);
 
     Color color{ lerp(t, Color(1.0, 1.0, 1.0), Color(0.5, 0.7, 1.0)) };
     color *= 255.999;
