@@ -47,6 +47,7 @@ set(CORE_SOURCE
     src/core/vector3d.cpp
     src/core/point3d.cpp
     src/core/render_thread.cpp
+    src/core/hittable.cpp
     src/cameras/camera.cpp
   )
 
@@ -59,6 +60,8 @@ set(CORE_HEADERS
     src/core/geometry.h
     src/core/ray.h
     src/core/render_thread.h
+    src/core/hittable.h
+    src/core/sphere.h
     src/cameras/camera.h
   )
 
