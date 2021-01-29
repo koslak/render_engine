@@ -47,7 +47,6 @@ set(CORE_SOURCE
     src/core/vector3d.cpp
     src/core/point3d.cpp
     src/core/render_thread.cpp
-    src/core/hittable.cpp
     src/cameras/camera.cpp
   )
 
