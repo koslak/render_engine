@@ -33,7 +33,10 @@ int main(int argc, char *argv[])
             if(is_screen_name_strings_equal)
             {
                 window_size.setSize(screen->geometry().size());
-                window_size.adjust(200, 200, -200, -200);
+                window_size.adjust(300, 300, -300, -300);
+
+                const auto aspect_ratio = 16.0 / 9.0;
+                window_size.setHeight(static_cast<int>(window_size.width() / aspect_ratio));
             }
         }
     }
