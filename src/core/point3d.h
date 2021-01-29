@@ -162,6 +162,16 @@ public:
 
     Point3d<T> operator-() const { return Point3d<T>(-x, -y, -z); }
 
+    double length_squared() const noexcept
+    {
+        return (x * x + y * y + z * z);
+    }
+
+    double length() const noexcept
+    {
+        return std::sqrt(length_squared());
+    }
+
     // Point3d Public Data
     T x, y, z;
 };
@@ -199,6 +209,12 @@ inline Point3d<T> operator*(U f, const Point3d<T> &p)
     assert(!p.HasNaNs());
 
     return p * f;
+}
+
+template <typename T>
+inline Point3d<T> normalize(const Point3d<T> &p)
+{
+    return p / p.length();
 }
 
 } // namespace DFL
