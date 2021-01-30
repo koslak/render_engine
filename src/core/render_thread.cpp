@@ -58,7 +58,7 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
         return DFL::Color{0.0, 0.0, 0.0};
     }
 
-    if(world.hit(ray, 0.0, DFL::Infinity, hit_record))
+    if(world.hit(ray, 0.001, DFL::Infinity, hit_record))
     {
         DFL::Point3d<double> target{ hit_record.point + hit_record.normal + DFL::random_in_unit_sphere<double>() };
 //        DFL::Vector3d<double> temp_vector{ hit_record.normal + DFL::Vector3d<double>(1.0, 1.0, 1.0) };
@@ -134,12 +134,15 @@ void Render_thread::run()
                 auto g{ pixel_color.y };
                 auto b{ pixel_color.z };
 
+                // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
                 auto scale{ 1.0 / samples_per_pixel };
-                r *= scale;
-                g *= scale;
-                b *= scale;
+                r *= std::sqrt(scale * r);
+                g *= std::sqrt(scale * g);
+                b *= std::sqrt(scale * b);
 
-                pixels[ idx ] = qRgb(255.999 * DFL::clamp(r, 0.0, 0.999), 255.999 * DFL::clamp(g, 0.0, 0.999), 255.999 * DFL::clamp(b, 0.0, 0.999));
+                pixels[ idx ] = qRgb(255.999 * DFL::clamp(r, 0.0, 0.999),
+                                     255.999 * DFL::clamp(g, 0.0, 0.999),
+                                     255.999 * DFL::clamp(b, 0.0, 0.999));
             }
 
             if(!is_restart)
