@@ -91,7 +91,7 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         DFL::Camera camera;
-        const int samples_per_pixel{ 1 };
+        const int samples_per_pixel{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
         Hittable_list world;
@@ -114,26 +114,15 @@ void Render_thread::run()
             {
                 DFL::Color pixel_color{0.0, 0.0, 0.0};
 
-
-                auto u = double(i) / (image_width - 1);
-                auto v = double(j) / (image_height - 1);
-
-                DFL::Ray ray{ camera.get_ray(u, v) };
-                pixel_color = ray_color(ray, world); // camera.ray_color(ray);
-
-                pixels[ idx ] = qRgb(255.999 * pixel_color.x, 255.999 * pixel_color.y, 255.999 * pixel_color.z);
-                /*
                 for(int samples = 0; samples < samples_per_pixel; ++samples)
                 {
-                    auto u = static_cast<double>(i) + DFL::random_double() / (image_width - 1);
-                    auto v = static_cast<double>(j) + DFL::random_double() / (image_height - 1);
+                    auto u = (i + DFL::random_double()) / (image_width - 1);
+                    auto v = (j + DFL::random_double()) / (image_height - 1);
 
                     DFL::Ray ray{ camera.get_ray(u, v) };
-                    pixel_color = ray_color(ray, world); // camera.ray_color(ray);
+                    pixel_color += ray_color(ray, world);
                 }
 
-                */
-                /*
                 auto r{ pixel_color.x };
                 auto g{ pixel_color.y };
                 auto b{ pixel_color.z };
@@ -143,10 +132,7 @@ void Render_thread::run()
                 g *= scale;
                 b *= scale;
 
-//                pixels[ idx ] = qRgb(pixel_color.x, pixel_color.y, pixel_color.z);
-//                pixels[ idx ] = qRgb(256 * DFL::clamp(r, 0.0, 0.999), 256 * DFL::clamp(g, 0.0, 0.999), 256 * DFL::clamp(b, 0.0, 0.999));
-//                pixels[ idx ] = qRgb(DFL::clamp(r, 0.0, 0.999), DFL::clamp(g, 0.0, 0.999), DFL::clamp(b, 0.0, 0.999));
-*/
+                pixels[ idx ] = qRgb(255.999 * DFL::clamp(r, 0.0, 0.999), 255.999 * DFL::clamp(g, 0.0, 0.999), 255.999 * DFL::clamp(b, 0.0, 0.999));
             }
 
             if(!is_restart)
