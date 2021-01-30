@@ -141,7 +141,7 @@ void Render_thread::run()
 //                g *= std::sqrt(scale * g);
 //                b *= std::sqrt(scale * b);
 
-                const double gamma{ 0.45 };
+                const double gamma{ 0.5 };
                 r *= std::pow((scale * r), 1 / gamma);
                 g *= std::pow((scale * g), 1 / gamma);
                 b *= std::pow((scale * b), 1 / gamma);
