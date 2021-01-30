@@ -5,7 +5,11 @@
 #include <QThread>
 #include <QWaitCondition>
 
+#include "core/geometry.h"
+
 class QImage;
+class Ray;
+class Hittable;
 
 class Render_thread : public QThread
 {
@@ -31,6 +35,8 @@ private:
 
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
+
+    DFL::Color ray_color(const DFL::Ray &ray, const Hittable &world);
 };
 
 #endif // RENDER_THREAD_H

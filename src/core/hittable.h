@@ -3,8 +3,6 @@
 
 #include "core/geometry.h"
 
-class Ray;
-
 struct Hit_record
 {
     DFL::Point3d<double> point;

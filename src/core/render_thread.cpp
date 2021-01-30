@@ -2,6 +2,9 @@
 
 #include "core/geometry.h"
 #include "cameras/camera.h"
+#include "core/hittable.h"
+#include "core/hittable_list.h"
+#include "core/sphere.h"
 
 #include <QImage>
 
@@ -45,6 +48,28 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height)
     }
 }
 
+DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world)
+{
+    Hit_record hit_record;
+
+    if(world.hit(ray, 0.0, DFL::Infinity, hit_record))
+    {
+        DFL::Vector3d<double> temp_vector{ hit_record.normal + DFL::Vector3d<double>(1.0, 1.0, 1.0) };
+        DFL::Color color { 0.5 * temp_vector.x, 0.5 * temp_vector.y, 0.5 * temp_vector.z };
+        color *= 255.999;
+
+        return color;
+    }
+
+    DFL::Vector3d<double> unit_direction{ normalize(ray.direction) };
+    auto t = 0.5 * (unit_direction.y + 1.0);
+
+    DFL::Color color{ (1.0 - t) * DFL::Color(1.0, 1.0, 1.0) + t * DFL::Color(0.5, 0.7, 1.0) };
+    color *= 255.999;
+
+    return color;
+}
+
 // The function body is an infinite loop which starts by storing the rendering parameters
 // in local variables. As usual, we protect accesses to the member variables using the
 // class's mutex. Storing the member variables in local variables allows us to minimize
@@ -68,6 +93,10 @@ void Render_thread::run()
         DFL::Camera camera;
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
+        Hittable_list world;
+        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.5));
+        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, -100.5, -1.0), 100.0));
+
         for(int j = image_height - 1; j >= 0; --j)
         {
             if(is_restart)
@@ -86,7 +115,7 @@ void Render_thread::run()
                 auto v = double(j) / (image_height - 1);
 
                 DFL::Ray ray{ camera.get_ray(u, v) };
-                DFL::Color pixel_color = camera.ray_color(ray);
+                DFL::Color pixel_color = ray_color(ray, world); // camera.ray_color(ray);
 
                 pixels[ idx ] = qRgb(pixel_color.x, pixel_color.y, pixel_color.z);
             }
