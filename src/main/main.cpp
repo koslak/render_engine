@@ -35,8 +35,11 @@ int main(int argc, char *argv[])
                 window_size.setSize(screen->geometry().size());
                 window_size.adjust(300, 300, -300, -300);
 
-                const auto aspect_ratio = 16.0 / 9.0;
+                constexpr const auto aspect_ratio = 16.0 / 9.0;
                 window_size.setHeight(static_cast<int>(window_size.width() / aspect_ratio));
+
+                constexpr const int adjust_parameter_for_window_width{ 120 };
+                window_size.setWidth( window_size.width() - adjust_parameter_for_window_width);
             }
         }
     }
