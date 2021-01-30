@@ -48,15 +48,22 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height)
     }
 }
 
-DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world)
+DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, int depth)
 {
     Hit_record hit_record;
 
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if(depth <= 0)
+    {
+        return DFL::Color{0.0, 0.0, 0.0};
+    }
+
     if(world.hit(ray, 0.0, DFL::Infinity, hit_record))
     {
-        DFL::Vector3d<double> temp_vector{ hit_record.normal + DFL::Vector3d<double>(1.0, 1.0, 1.0) };
-        DFL::Color color { 0.5 * temp_vector.x, 0.5 * temp_vector.y, 0.5 * temp_vector.z };
-//        color *= 255.999;
+        DFL::Point3d<double> target{ hit_record.point + hit_record.normal + DFL::random_in_unit_sphere<double>() };
+//        DFL::Vector3d<double> temp_vector{ hit_record.normal + DFL::Vector3d<double>(1.0, 1.0, 1.0) };
+//        DFL::Color color { 0.5 * temp_vector.x, 0.5 * temp_vector.y, 0.5 * temp_vector.z };
+        DFL::Color color { 0.5 * ray_color(DFL::Ray(hit_record.point, target - hit_record.point), world, depth - 1) };
 
         return color;
     }
@@ -65,7 +72,6 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world)
     auto t = 0.5 * (unit_direction.y + 1.0);
 
     DFL::Color color{ (1.0 - t) * DFL::Color(1.0, 1.0, 1.0) + t * DFL::Color(0.5, 0.7, 1.0) };
-//    color *= 255.999;
 
     return color;
 }
@@ -91,7 +97,8 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         DFL::Camera camera;
-        const int samples_per_pixel{ 50 };
+        const int samples_per_pixel{ 100 };
+        const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
         Hittable_list world;
@@ -120,7 +127,7 @@ void Render_thread::run()
                     auto v = (j + DFL::random_double()) / (image_height - 1);
 
                     DFL::Ray ray{ camera.get_ray(u, v) };
-                    pixel_color += ray_color(ray, world);
+                    pixel_color += ray_color(ray, world, max_depth);
                 }
 
                 auto r{ pixel_color.x };

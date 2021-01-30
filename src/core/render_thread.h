@@ -36,7 +36,7 @@ private:
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
 
-    DFL::Color ray_color(const DFL::Ray &ray, const Hittable &world);
+    DFL::Color ray_color(const DFL::Ray &ray, const Hittable &world, int depth);
 };
 
 #endif // RENDER_THREAD_H

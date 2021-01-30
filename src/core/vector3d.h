@@ -121,6 +121,16 @@ public:
         return std::sqrt(length_squared());
     }
 
+    static Vector3d<T> random()
+    {
+        return Vector3d<T>(random_double(), random_double(), random_double());
+    }
+
+    static Vector3d<T> random(double min, double max)
+    {
+        return Vector3d<T>(random_double(min, max), random_double(min, max), random_double(min, max));
+    }
+
     // Public data
     T x, y, z;
 };
@@ -170,6 +180,23 @@ inline Vector3d<T> normalize(const Vector3d<T> &v)
 {
     return v / v.length();
 }
+
+template <typename T>
+inline Vector3d<T> random_in_unit_sphere()
+{
+    while(true)
+    {
+        Vector3d<T> p = Vector3d<T>::random(-1.0, 1.0);
+
+        if(p.length_squared() >= 1)
+        {
+            continue;
+        }
+
+        return p;
+    }
+}
+
 
 } // namespace DFL
 
