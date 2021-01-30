@@ -60,9 +60,7 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
 
     if(world.hit(ray, 0.001, DFL::Infinity, hit_record))
     {
-        DFL::Point3d<double> target{ hit_record.point + hit_record.normal + DFL::random_in_unit_sphere<double>() };
-//        DFL::Vector3d<double> temp_vector{ hit_record.normal + DFL::Vector3d<double>(1.0, 1.0, 1.0) };
-//        DFL::Color color { 0.5 * temp_vector.x, 0.5 * temp_vector.y, 0.5 * temp_vector.z };
+        DFL::Point3d<double> target{ hit_record.point + DFL::random_in_hemisphere(hit_record.normal) }; // hit_record.normal + DFL::random_unit_vector<double>() };
         DFL::Color color { 0.5 * ray_color(DFL::Ray(hit_record.point, target - hit_record.point), world, depth - 1) };
 
         return color;
@@ -70,7 +68,6 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
 
     DFL::Vector3d<double> unit_direction{ normalize(ray.direction) };
     auto t = 0.5 * (unit_direction.y + 1.0);
-
     DFL::Color color{ (1.0 - t) * DFL::Color(1.0, 1.0, 1.0) + t * DFL::Color(0.5, 0.7, 1.0) };
 
     return color;
@@ -97,7 +94,7 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         DFL::Camera camera;
-        const int samples_per_pixel{ 100 };
+        const int samples_per_pixel{ 10 };
         const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
@@ -134,15 +131,24 @@ void Render_thread::run()
                 auto g{ pixel_color.y };
                 auto b{ pixel_color.z };
 
+                if (r != r) r = 0.0;
+                if (g != g) g = 0.0;
+                if (b != b) b = 0.0;
+
                 // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
                 auto scale{ 1.0 / samples_per_pixel };
-                r *= std::sqrt(scale * r);
-                g *= std::sqrt(scale * g);
-                b *= std::sqrt(scale * b);
+//                r *= std::sqrt(scale * r);
+//                g *= std::sqrt(scale * g);
+//                b *= std::sqrt(scale * b);
 
-                pixels[ idx ] = qRgb(255.999 * DFL::clamp(r, 0.0, 0.999),
-                                     255.999 * DFL::clamp(g, 0.0, 0.999),
-                                     255.999 * DFL::clamp(b, 0.0, 0.999));
+                const double gamma{ 0.45 };
+                r *= std::pow((scale * r), 1 / gamma);
+                g *= std::pow((scale * g), 1 / gamma);
+                b *= std::pow((scale * b), 1 / gamma);
+
+                pixels[ idx ] = qRgb(256 * DFL::clamp(r, 0.0, 0.999),
+                                     256 * DFL::clamp(g, 0.0, 0.999),
+                                     256 * DFL::clamp(b, 0.0, 0.999));
             }
 
             if(!is_restart)

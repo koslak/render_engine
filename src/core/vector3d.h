@@ -197,6 +197,25 @@ inline Vector3d<T> random_in_unit_sphere()
     }
 }
 
+template <typename T>
+inline Vector3d<T> random_unit_vector()
+{
+    return normalize(random_in_unit_sphere<T>());
+}
+
+template <typename T>
+inline Vector3d<T> random_in_hemisphere(const Vector3d<T> &normal)
+{
+    Vector3d<T> in_unit_sphere = random_in_unit_sphere<T>();
+
+    if(dot(in_unit_sphere, normal) > 0.0)
+    {
+        return in_unit_sphere;
+
+    }else{
+        return -in_unit_sphere;
+    }
+}
 
 } // namespace DFL
 
