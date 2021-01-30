@@ -19,8 +19,6 @@ Camera::Camera()
 
 Ray Camera::get_ray(double u, double v) const noexcept
 {
-//    DFL::Ray ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-//    qDebug() << "ray: o: [" << ray.origin.x << ", " << ray.origin.y << ", " << ray.origin.z << "] direction: [" << ray.direction.x << ", " << ray.direction.y << ", " << ray.direction.z << "]";
     return DFL::Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 }
 
