@@ -45,7 +45,8 @@ bool Sphere::hit(const DFL::Ray& ray, double t_min, double t_max, Hit_record& hi
 
     hit_record.t = root;
     hit_record.point = ray(hit_record.t);
-    hit_record.normal = (hit_record.point - center) / radius;
+    DFL::Vector3d<double> outward_vector{ (hit_record.point - center) / radius };
+    hit_record.set_face_normal(ray, outward_vector);
 
     return true;
 }
