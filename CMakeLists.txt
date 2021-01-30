@@ -60,6 +60,7 @@ set(CORE_HEADERS
     src/core/ray.h
     src/core/render_thread.h
     src/core/hittable.h
+    src/core/hittable_list.h
     src/core/sphere.h
     src/cameras/camera.h
   )
