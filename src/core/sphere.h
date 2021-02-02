@@ -7,13 +7,14 @@ class Sphere : public Hittable
 {
 public:
     Sphere() = default;
-    Sphere(DFL::Point3d<double> center, double radius) : center(center), radius(radius) {}
+    Sphere(DFL::Point3d<double> center, double radius, std::shared_ptr<Material> material) : center(center), radius(radius), material_ptr(material){}
 
     virtual bool hit(const DFL::Ray& r, double t_min, double t_max, Hit_record& hit_record) const override;
 
 private:
     DFL::Point3d<double> center;
     double radius;
+    std::shared_ptr<Material> material_ptr;
 };
 
 bool Sphere::hit(const DFL::Ray& ray, double t_min, double t_max, Hit_record& hit_record) const
@@ -47,6 +48,7 @@ bool Sphere::hit(const DFL::Ray& ray, double t_min, double t_max, Hit_record& hi
     hit_record.point = ray(hit_record.t);
     DFL::Vector3d<double> outward_vector{ (hit_record.point - center) / radius };
     hit_record.set_face_normal(ray, outward_vector);
+    hit_record.material_ptr = material_ptr;
 
     return true;
 }

@@ -5,6 +5,7 @@
 #include "core/hittable.h"
 #include "core/hittable_list.h"
 #include "core/sphere.h"
+#include "core/material.h"
 
 #include <QImage>
 
@@ -60,10 +61,18 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
 
     if(world.hit(ray, 0.001, DFL::Infinity, hit_record))
     {
-        DFL::Point3d<double> target{ hit_record.point + DFL::random_in_hemisphere(hit_record.normal) }; // hit_record.normal + DFL::random_unit_vector<double>() };
-        DFL::Color color { 0.5 * ray_color(DFL::Ray(hit_record.point, target - hit_record.point), world, depth - 1) };
+        DFL::Ray scattered_ray;
+        DFL::Color attenuation_color;
 
-        return color;
+        if(hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, scattered_ray))
+        {
+            return (attenuation_color * ray_color(scattered_ray, world, depth - 1));
+        }
+//        DFL::Point3d<double> target{ hit_record.point + DFL::random_in_hemisphere(hit_record.normal) }; // hit_record.normal + DFL::random_unit_vector<double>() };
+//        DFL::Color color { 0.5 * ray_color(DFL::Ray(hit_record.point, target - hit_record.point), world, depth - 1) };
+
+//        return color;
+        return DFL::Color{0.0, 0.0, 0.0};
     }
 
     DFL::Vector3d<double> unit_direction{ normalize(ray.direction) };
@@ -94,13 +103,23 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         DFL::Camera camera;
-        const int samples_per_pixel{ 10 };
+        const int samples_per_pixel{ 5 };
         const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
         Hittable_list world;
-        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.5));
-        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, -100.5, -1.0), 100.0));
+//        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.5));
+//        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, -100.5, -1.0), 100.0));
+
+        auto material_ground = std::make_shared<Lambertian>(DFL::Color(0.8, 0.8, 0.0));
+        auto material_center = std::make_shared<Lambertian>(DFL::Color(0.7, 0.3, 0.3));
+        auto material_left   = std::make_shared<Metal>(DFL::Color(0.8, 0.8, 0.8));
+        auto material_right  = std::make_shared<Metal>(DFL::Color(0.8, 0.6, 0.2));
+
+        world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0,    0.0, -1.0),   0.5, material_center));
+        world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
+        world.add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
 
         for(int j = image_height - 1; j >= 0; --j)
         {
@@ -141,7 +160,7 @@ void Render_thread::run()
 //                g *= std::sqrt(scale * g);
 //                b *= std::sqrt(scale * b);
 
-                const double gamma{ 0.5 };
+                const double gamma{ 0.8 };
                 r *= std::pow((scale * r), 1 / gamma);
                 g *= std::pow((scale * g), 1 / gamma);
                 b *= std::pow((scale * b), 1 / gamma);

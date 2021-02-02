@@ -63,6 +63,7 @@ set(CORE_HEADERS
     src/core/hittable_list.h
     src/core/sphere.h
     src/cameras/camera.h
+    src/core/material.h
   )
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})

@@ -3,10 +3,13 @@
 
 #include "core/geometry.h"
 
+class Material;
+
 struct Hit_record
 {
     DFL::Point3d<double> point;
     DFL::Vector3d<double> normal;
+    std::shared_ptr<Material> material_ptr;
     double t;
     bool front_face;
 
