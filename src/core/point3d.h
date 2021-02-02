@@ -34,6 +34,13 @@ public:
         return Point3d<T>(x + v.x, y + v.y, z + v.z);
     }
 
+    Point3d<T> operator*(const Point3d<T> &v) const
+    {
+        assert(!v.HasNaNs());
+
+        return Point3d<T>(x * v.x, y * v.y, z * v.z);
+    }
+
     Point3d<T> &operator+=(const Vector3d<T> &v)
     {
         assert(!v.HasNaNs());
@@ -210,6 +217,14 @@ inline Point3d<T> operator*(U f, const Point3d<T> &p)
 
     return p * f;
 }
+
+/*
+template <typename T>
+inline Point3d<T> operator*(const Point3d<T> &u, const Point3d<T> &v)
+{
+    return Point3d<T>(u.x * v.x, u.y * v.y, u.z * v.z);
+}
+*/
 
 template <typename T>
 inline Point3d<T> normalize(const Point3d<T> &p)
