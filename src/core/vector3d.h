@@ -131,6 +131,14 @@ public:
         return Vector3d<T>(random_double(min, max), random_double(min, max), random_double(min, max));
     }
 
+    bool near_zero() const
+    {
+        // Return true if the vector is close to zero in all dimensions.
+        const auto s{ 1e-8 };
+
+        return ((std::fabs(x) < s) && (std::fabs(y) < s) && (std::fabs(z) < s));
+    }
+
     // Public data
     T x, y, z;
 };
@@ -216,6 +224,13 @@ inline Vector3d<T> random_in_hemisphere(const Vector3d<T> &normal)
         return -in_unit_sphere;
     }
 }
+
+template <typename T>
+inline Vector3d<T> reflect(const Vector3d<T> &v, const Vector3d<T> &n)
+{
+    return (v - 2 * dot(v, n) * n);
+}
+
 
 } // namespace DFL
 
