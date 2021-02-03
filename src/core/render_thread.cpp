@@ -112,8 +112,7 @@ void Render_thread::run()
 
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
-        DFL::Camera camera;
-        const int samples_per_pixel{ 20 };
+        const int samples_per_pixel{ 2 };
         const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
@@ -131,6 +130,16 @@ void Render_thread::run()
         world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
         world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),  -0.4, material_left));
         world.add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
+
+        const auto aspect_ratio = 16.0 / 9.0;
+        DFL::Point3d<double> look_from{ 3.0, 3.0, 2.0 };
+        DFL::Point3d<double> look_at{ 0.0, 0.0, -1.0 };
+        DFL::Vector3d<double> vup{ 0.0, 1.0, 0.0 };
+        auto distance_to_focus = (look_from - look_at).length();
+        auto aperture{ 2.0 };
+        double vertical_field_of_view{ 20.0 };
+
+        DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
 
         for(int j = image_height - 1; j >= 0; --j)
         {
@@ -171,7 +180,7 @@ void Render_thread::run()
 //                g *= std::sqrt(scale * g);
 //                b *= std::sqrt(scale * b);
 
-                const double gamma{ 0.6 };
+                const double gamma{ 2.2 };
                 r *= std::pow((scale * r), 1.0 / gamma);
                 g *= std::pow((scale * g), 1.0 / gamma);
                 b *= std::pow((scale * b), 1.0 / gamma);

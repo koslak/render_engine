@@ -4,22 +4,33 @@
 
 namespace DFL {
 
-Camera::Camera()
+Camera::Camera(DFL::Point3d<double> look_from, DFL::Point3d<double> look_at,
+               DFL::Vector3d<double> view_up_vector, double vertical_field_of_view,
+               double aspect_ratio, double aperture, double focus_distance)
 {
-    const auto aspect_ratio = 16.0 / 9.0;
-    auto viewport_height = 2.0;
+    auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
+    auto h{ theta / 2 };
+    auto viewport_height = 2.0 * h;
     auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
 
-    origin = DFL::Point3d<double>{ 0, 0, 0 };
-    horizontal = DFL::Vector3d<double>{ viewport_width, 0, 0 };
-    vertical = DFL::Vector3d<double>(0, viewport_height, 0);
-    lower_left_corner = origin - horizontal/2 - vertical/2 - DFL::Vector3d<double>(0, 0, focal_length);
+    w = DFL::normalize(look_from - look_at);
+    u = DFL::normalize(DFL::cross(view_up_vector, w));
+    v = DFL::cross(w, u);
+
+    origin = look_from;
+    horizontal = focus_distance * viewport_width * u;
+    vertical = focus_distance * viewport_height * v;
+    lower_left_corner = origin - horizontal/2 - vertical/2 - focus_distance * w;
+
+    lens_radius = aperture / 2;
 }
 
 Ray Camera::get_ray(double u, double v) const noexcept
 {
-    return DFL::Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
+    DFL::Vector3d<double> rd{ lens_radius * DFL::random_in_unit_disk<double>() };
+    DFL::Vector3d<double> offset{ u * rd.x + v * rd.y };
+
+    return DFL::Ray(origin + offset, lower_left_corner + u * horizontal + v * vertical - origin - offset);
 }
 
 double hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r) noexcept

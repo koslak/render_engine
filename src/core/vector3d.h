@@ -227,6 +227,22 @@ inline Vector3d<T> random_in_hemisphere(const Vector3d<T> &normal)
 }
 
 template <typename T>
+DFL::Vector3d<double> random_in_unit_disk()
+{
+    while (true)
+    {
+        auto p = DFL::Vector3d<double>(random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0);
+
+        if(p.length_squared() >= 1)
+        {
+            continue;
+        }
+
+        return p;
+    }
+}
+
+template <typename T>
 inline Vector3d<T> reflect(const Vector3d<T> &v, const Vector3d<T> &n)
 {
     return (v - 2 * dot(v, n) * n);
