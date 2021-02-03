@@ -65,14 +65,35 @@ public:
         double refraction_ratio{ hit_record.front_face ? (1.0 / index_of_refraction) : index_of_refraction };
 
         DFL::Vector3d<double> unit_direction{ DFL::normalize(ray_in.direction) };
-        DFL::Vector3d<double> refracted{ DFL::refract(unit_direction, hit_record.normal, refraction_ratio) };
+        double cos_theta{ std::fmin(DFL::dot(-unit_direction, hit_record.normal), 1.0) };
+        double sin_theta{ std::sqrt(1.0 - cos_theta * cos_theta) };
 
-        scattered_ray = DFL::Ray{ hit_record.point, refracted };
+        bool cannot_refract{ refraction_ratio * sin_theta > 1.0 };
+        DFL::Vector3d<double> direction_vector;
+
+        if(cannot_refract || reflectance(cos_theta, refraction_ratio) > DFL::random_double())
+        {
+            direction_vector = DFL::reflect(unit_direction, hit_record.normal);
+        }else{
+            direction_vector = DFL::refract(unit_direction, hit_record.normal, refraction_ratio);
+        }
+
+        scattered_ray = DFL::Ray{ hit_record.point, direction_vector };
 
         return true;
     }
 
     double index_of_refraction;
+
+private:
+    static double reflectance(double cosine, double ref_idx)
+    {
+        // Use Schlick's approximation for reflectance.
+        auto r0 = (1 - ref_idx) / (1 + ref_idx);
+        r0 = r0 * r0;
+
+        return r0 + (1 - r0) * std::pow((1 - cosine), 5);
+    }
 };
 
 

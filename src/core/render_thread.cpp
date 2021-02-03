@@ -113,7 +113,7 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         DFL::Camera camera;
-        const int samples_per_pixel{ 2 };
+        const int samples_per_pixel{ 20 };
         const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
@@ -122,13 +122,14 @@ void Render_thread::run()
 //        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, -100.5, -1.0), 100.0));
 
         auto material_ground = std::make_shared<Lambertian>(DFL::Color(0.8, 0.8, 0.0));
-        auto material_center = std::make_shared<Dielectric>(1.5);
+        auto material_center = std::make_shared<Lambertian>(DFL::Color(0.1, 0.2, 0.5));
         auto material_left   = std::make_shared<Dielectric>(1.5);
         auto material_right  = std::make_shared<Metal>(DFL::Color(0.8, 0.6, 0.2), 1.0);
 
         world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0, -100.5, -1.0), 100.0, material_ground));
         world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0,    0.0, -1.0),   0.5, material_center));
         world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
+        world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),  -0.4, material_left));
         world.add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
 
         for(int j = image_height - 1; j >= 0; --j)
@@ -166,14 +167,14 @@ void Render_thread::run()
 
                 // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
                 auto scale{ 1.0 / samples_per_pixel };
-                r *= std::sqrt(scale * r);
-                g *= std::sqrt(scale * g);
-                b *= std::sqrt(scale * b);
+//                r *= std::sqrt(scale * r);
+//                g *= std::sqrt(scale * g);
+//                b *= std::sqrt(scale * b);
 
-//                const double gamma{ 2.0 };
-//                r *= std::pow((scale * r), 1.0 / gamma);
-//                g *= std::pow((scale * g), 1.0 / gamma);
-//                b *= std::pow((scale * b), 1.0 / gamma);
+                const double gamma{ 0.6 };
+                r *= std::pow((scale * r), 1.0 / gamma);
+                g *= std::pow((scale * g), 1.0 / gamma);
+                b *= std::pow((scale * b), 1.0 / gamma);
 
                 pixels[ idx ] = qRgb(256 * DFL::clamp(r, 0.0, 0.999),
                                      256 * DFL::clamp(g, 0.0, 0.999),
