@@ -32,12 +32,41 @@ inline double random_double(double min, double max)
     return min + (max - min) * random_double();
 }
 
-inline double clamp(double x, double min, double max)
+template<typename T>
+T min(const T &a, const T &b)
 {
-    if(x < min) return min;
-    if(x > max) return max;
+    return a < b ? a : b;
+}
 
-    return x;
+template<typename T, typename... Ts>
+T min(const T &a, const T &b, const Ts &... ts)
+{
+    return min(min(a, b), ts...);
+}
+
+template<typename T>
+T max(const T &a, const T &b)
+{
+    return a > b ? a : b;
+}
+
+template<typename T, typename... Ts>
+T max(const T &a, const T &b, const Ts &... ts)
+{
+    return max(max(a, b), ts...);
+}
+
+template<typename T>
+T clamp(T val, T min_val, T max_val)
+{
+    /*
+    if(val < min_val) return min_val;
+    if(val > max_val) return max_val;
+
+    return val;
+    */
+
+    return DFL::min(DFL::max(val, min_val), max_val);
 }
 
 }  // namespace DFL
