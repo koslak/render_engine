@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QThread>
 #include <QWaitCondition>
+#include <QColor>
 
 #include "core/geometry.h"
 
@@ -36,6 +37,7 @@ private:
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
 
+    QRgb tonemap(const DFL::Vector3d<double> &c) const;
     DFL::Color ray_color(const DFL::Ray &ray, const Hittable &world, int depth);
 };
 
