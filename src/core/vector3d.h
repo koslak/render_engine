@@ -24,6 +24,7 @@ class Vector3d
 public:
     Vector3d() { x = y = z = 0.0; }
     Vector3d(T x, T y, T z) : x(x), y(y), z(z) {}
+    Vector3d(T value) : x(value), y(value), z(value) {}
 
     bool HasNaNs() const noexcept
     {
@@ -229,6 +230,15 @@ template <typename T>
 inline Vector3d<T> reflect(const Vector3d<T> &v, const Vector3d<T> &n)
 {
     return (v - 2 * dot(v, n) * n);
+}
+
+template <typename T>
+inline Vector3d<T> refract(const Vector3d<T> &uv, const Vector3d<T> &n, double etai_over_etat)
+{
+    auto cos_theta = std::fmin(dot(-uv, n), 1.0);
+    Vector3d<T> r_out_perp =  etai_over_etat * (uv + cos_theta * n);
+    Vector3d<T> r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel;
 }
 
 
