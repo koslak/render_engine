@@ -23,6 +23,7 @@ signals:
 
 private slots:
     void update_image(const QImage &image, int progress);
+    void finished_rendering_image();
 
 private:
     Render_thread render_thread;
