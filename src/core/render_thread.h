@@ -13,8 +13,6 @@ class Ray;
 class Hittable;
 class Hittable_list;
 
-class QIODevice;
-
 class Render_thread : public QThread
 {
     Q_OBJECT
@@ -41,10 +39,9 @@ private:
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
 
-    QRgb tonemap(const DFL::Color &c) const;
     Hittable_list generate_random_scene();
-    DFL::Color ray_color(const DFL::Ray &ray, Hittable *world, int depth);
-    void write_color(QIODevice *file, DFL::Color pixel_color, int samples_per_pixel);
+    DFL::Color ray_color(const DFL::Ray &ray, Hittable *world, int depth) noexcept;
+    QRgb gamma_correction(const DFL::Color pixel_color, int samples_per_pixel) const noexcept;
 
     double aspect_ratio;
     int samples_per_pixel;

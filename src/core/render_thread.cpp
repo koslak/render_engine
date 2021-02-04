@@ -6,11 +6,8 @@
 #include "core/hittable_list.h"
 #include "core/sphere.h"
 #include "core/material.h"
-#include "core/Tonemap.h"
 
 #include <QImage>
-#include <QFile>
-#include <QTextStream>
 
 Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ DFL::Point3d<double>{ 3.0, 2.0, 8.0 } },
                                                                  look_at{ DFL::Point3d<double>{ 0.0, 0.0, 0.0 } },
@@ -25,10 +22,6 @@ Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ DFL:
     distance_to_focus = 10.0;
     aperture = 0.1;
     vertical_field_of_view = 20.0;
-
-    QFile file("result_image.ppm");
-    file.open(QFile::WriteOnly|QFile::Truncate);
-    file.close();
 }
 
 Render_thread::~Render_thread()
@@ -64,24 +57,6 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height)
         is_restart = true;
         wait_condition.wakeOne();
     }
-}
-
-QRgb Render_thread::tonemap(const DFL::Color &c) const
-{
-    float _pow2Exposure{ 1.0f };
-    DFL::Vector3d<double> cc{ c * _pow2Exposure * 255.0f };
-
-    double x = DFL::clamp(cc.x, 0.0, 255.0);
-    double y = DFL::clamp(cc.y, 0.0, 255.0);
-    double z = DFL::clamp(cc.z, 0.0, 255.0);
-
-//    DFL::Vector3d<double> pixel(DFL::clamp(cc, DFL::Vector3d<double>(0.0f), DFL::Vector3d<double>(255.0f)));
-    DFL::Vector3d<double> pixel(x, y, z);
-
-//    DFL::Vector3d<double> result{ Tonemap::tonemap(Tonemap::Reinhard, DFL::max(pixel, DFL::Vector3d<double>(0.0))) };
-    DFL::Vector3d<double> result{ Tonemap::tonemap(Tonemap::LinearOnly, pixel) };
-
-    return qRgb(result.x, result.y, result.z);
 }
 
 Hittable_list Render_thread::generate_random_scene()
@@ -135,7 +110,7 @@ Hittable_list Render_thread::generate_random_scene()
     return world;
 }
 
-DFL::Color Render_thread::ray_color(const DFL::Ray &ray, Hittable *world, int depth)
+DFL::Color Render_thread::ray_color(const DFL::Ray &ray, Hittable *world, int depth) noexcept
 {
     Hit_record hit_record;
 
@@ -163,6 +138,36 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, Hittable *world, int de
     DFL::Color color{ (1.0 - t) * DFL::Color(1.0, 1.0, 1.0) + t * DFL::Color(0.5, 0.7, 1.0) };
 
     return color;
+}
+
+QRgb Render_thread::gamma_correction(const DFL::Color pixel_color, int samples_per_pixel) const noexcept
+{
+    auto r{ pixel_color.x };
+    auto g{ pixel_color.y };
+    auto b{ pixel_color.z };
+
+    // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
+    if (r != r) r = 0.0;
+    if (g != g) g = 0.0;
+    if (b != b) b = 0.0;
+
+    // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
+    auto scale{ 1.0 / samples_per_pixel };
+
+    /*
+    r = std::sqrt(scale * r);
+    g = std::sqrt(scale * g);
+    b = std::sqrt(scale * b);
+    */
+
+    const double gamma{ 1.2 };
+    r = std::pow((scale * r), 1.0 / gamma);
+    g = std::pow((scale * g), 1.0 / gamma);
+    b = std::pow((scale * b), 1.0 / gamma);
+
+    return qRgb(static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999)),
+                static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999)),
+                static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)));
 }
 
 // The function body is an infinite loop which starts by storing the rendering parameters
@@ -205,12 +210,6 @@ void Render_thread::run()
 
         DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
 
-        QFile *file = new QFile("result_image.ppm");
-        if (!file->open(QIODevice::WriteOnly | QIODevice::Append))
-        {
-            return;
-        }
-
         for(int j = image_height - 1; j >= 0; --j)
         {
             if(is_restart)
@@ -236,40 +235,7 @@ void Render_thread::run()
                     pixel_color += ray_color(ray, world.get(), max_depth);
                 }
 
-                auto r{ pixel_color.x };
-                auto g{ pixel_color.y };
-                auto b{ pixel_color.z };
-
-                // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
-                if (r != r) r = 0.0;
-                if (g != g) g = 0.0;
-                if (b != b) b = 0.0;
-
-                // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
-                auto scale{ 1.0 / samples_per_pixel };
-                /*
-                r = std::sqrt(scale * r);
-                g = std::sqrt(scale * g);
-                b = std::sqrt(scale * b);
-                */
-                const double gamma{ 2.2 };
-                r = std::pow((scale * r), 1.0 / gamma);
-                g = std::pow((scale * g), 1.0 / gamma);
-                b = std::pow((scale * b), 1.0 / gamma);
-
-                DFL::Color result_color;
-
-                result_color.x = static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999));
-                result_color.y = static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999));
-                result_color.z = static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999));
-
-                pixels[ idx ] = qRgb(result_color.x, result_color.y, result_color.z);
-
-//                pixels[ idx ] = tonemap(pixel_color);
-
-//                DFL::Vector3d<double> tonemap_vector = Tonemap::tonemap(Tonemap::GammaOnly, DFL::max(pixel_color, DFL::Vector3d<double>(0.0f)));
-//                pixels[ idx ] = tonemap(pixel_color);
-                write_color(file, result_color, samples_per_pixel);
+                pixels[ idx ] = gamma_correction(pixel_color, samples_per_pixel);
             }
 
             if(!is_restart)
@@ -292,64 +258,6 @@ void Render_thread::run()
         mutex.unlock();
     }
 }
-
-void Render_thread::write_color(QIODevice *file, DFL::Color pixel_color, int samples_per_pixel)
-{
-    QTextStream out(file);
-    static int first_time{ true };
-
-    if(first_time == true)
-    {
-        out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-        first_time = false;
-    }
-
-    /*
-    auto r = pixel_color.x;
-    auto g = pixel_color.y;
-    auto b = pixel_color.z;
-
-    // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
-    if (r != r) r = 0.0;
-    if (g != g) g = 0.0;
-    if (b != b) b = 0.0;
-
-    // Divide the color by the number of samples and gamma-correct for gamma=2.0.
-    auto scale = 1.0 / samples_per_pixel;
-    r = sqrt(scale * r);
-    g = sqrt(scale * g);
-    b = sqrt(scale * b);
-
-    // Write the translated [0,255] value of each color component.
-    out << static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999)) << ' '
-        << static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999)) << ' '
-        << static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)) << '\n';
-    */
-    out << static_cast<int>(pixel_color.x) << ' '
-        << static_cast<int>(pixel_color.y) << ' '
-        << static_cast<int>(pixel_color.z) << '\n';
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
