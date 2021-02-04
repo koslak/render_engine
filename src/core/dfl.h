@@ -35,7 +35,7 @@ inline double random_double(double min, double max)
 template<typename T>
 T min(const T &a, const T &b)
 {
-    return a < b ? a : b;
+    return (a < b) ? a : b;
 }
 
 template<typename T, typename... Ts>
@@ -47,7 +47,7 @@ T min(const T &a, const T &b, const Ts &... ts)
 template<typename T>
 T max(const T &a, const T &b)
 {
-    return a > b ? a : b;
+    return (a > b) ? a : b;
 }
 
 template<typename T, typename... Ts>
