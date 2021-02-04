@@ -6,12 +6,29 @@
 #include "core/hittable_list.h"
 #include "core/sphere.h"
 #include "core/material.h"
+#include "core/Tonemap.h"
 
 #include <QImage>
+#include <QFile>
+#include <QTextStream>
 
-Render_thread::Render_thread(QObject *parent) : QThread(parent)
+Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ DFL::Point3d<double>{ 3.0, 2.0, 8.0 } },
+                                                                 look_at{ DFL::Point3d<double>{ 0.0, 0.0, 0.0 } },
+                                                                 vup{ DFL::Vector3d<double>{ 0.0, 1.0, 0.0 } }
 {
+    world = std::make_unique<Hittable_list>( generate_random_scene() );
 
+    aspect_ratio = 16.0 / 9.0;
+    samples_per_pixel = 50;
+    max_depth = 50;
+
+    distance_to_focus = 10.0;
+    aperture = 0.1;
+    vertical_field_of_view = 20.0;
+
+    QFile file("result_image.ppm");
+    file.open(QFile::WriteOnly|QFile::Truncate);
+    file.close();
 }
 
 Render_thread::~Render_thread()
@@ -49,17 +66,76 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height)
     }
 }
 
-QRgb Render_thread::tonemap(const DFL::Vector3d<double> &c) const
+QRgb Render_thread::tonemap(const DFL::Color &c) const
 {
     float _pow2Exposure{ 1.0f };
     DFL::Vector3d<double> cc{ c * _pow2Exposure * 255.0f };
-//    DFL::Vector3d<double> pixel(DFL::clamp(cc, DFL::Vector3d<double>(0.0f), DFL::Vector3d<double>(255.0f)));
-    DFL::Vector3d<double> pixel;
 
-    return qRgb(pixel.x, pixel.y, pixel.z);
+    double x = DFL::clamp(cc.x, 0.0, 255.0);
+    double y = DFL::clamp(cc.y, 0.0, 255.0);
+    double z = DFL::clamp(cc.z, 0.0, 255.0);
+
+//    DFL::Vector3d<double> pixel(DFL::clamp(cc, DFL::Vector3d<double>(0.0f), DFL::Vector3d<double>(255.0f)));
+    DFL::Vector3d<double> pixel(x, y, z);
+
+//    DFL::Vector3d<double> result{ Tonemap::tonemap(Tonemap::Reinhard, DFL::max(pixel, DFL::Vector3d<double>(0.0))) };
+    DFL::Vector3d<double> result{ Tonemap::tonemap(Tonemap::LinearOnly, pixel) };
+
+    return qRgb(result.x, result.y, result.z);
 }
 
-DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, int depth)
+Hittable_list Render_thread::generate_random_scene()
+{
+    Hittable_list world;
+
+    auto ground_material = std::make_shared<Lambertian>(DFL::Color(0.5, 0.5, 0.5));
+    world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0,-1000,0), 1000, ground_material));
+
+    for (int a = -11; a < 11; a++)
+    {
+        for (int b = -11; b < 11; b++)
+        {
+            auto choose_mat = DFL::random_double();
+            DFL::Point3d<double> center{ a + 0.9 * DFL::random_double(), 0.2, b + 0.9 * DFL::random_double() };
+
+            if ((center - DFL::Point3d<double>(4, 0.2, 0)).length() > 0.9)
+            {
+                std::shared_ptr<Material> sphere_material;
+
+                if(choose_mat < 0.8)
+                {
+                    // diffuse
+                    DFL::Color albedo = DFL::Color::random() * DFL::Color::random();
+                    sphere_material = std::make_shared<Lambertian>(albedo);
+                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+                } else if (choose_mat < 0.95) {
+                    // metal
+                    DFL::Color albedo = DFL::Color::random(0.5, 1);
+                    auto fuzz = DFL::random_double(0, 0.5);
+                    sphere_material = std::make_shared<Metal>(albedo, fuzz);
+                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+                } else {
+                    // glass
+                    sphere_material = std::make_shared<Dielectric>(1.5);
+                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
+                }
+            }
+        }
+    }
+
+    auto material1 = std::make_shared<Dielectric>(1.5);
+    world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0, 1, 0), 1.0, material1));
+
+    auto material2 = std::make_shared<Lambertian>(DFL::Color(0.4, 0.2, 0.1));
+    world.add(std::make_shared<Sphere>(DFL::Point3d<double>(-4, 1, 0), 1.0, material2));
+
+    auto material3 = std::make_shared<Metal>(DFL::Color(0.7, 0.6, 0.5), 0.0);
+    world.add(std::make_shared<Sphere>(DFL::Point3d<double>(4, 1, 0), 1.0, material3));
+
+    return world;
+}
+
+DFL::Color Render_thread::ray_color(const DFL::Ray &ray, Hittable *world, int depth)
 {
     Hit_record hit_record;
 
@@ -69,7 +145,7 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
         return DFL::Color{0.0, 0.0, 0.0};
     }
 
-    if(world.hit(ray, 0.001, DFL::Infinity, hit_record))
+    if(world->hit(ray, 0.001, DFL::Infinity, hit_record))
     {
         DFL::Ray scattered_ray;
         DFL::Color attenuation_color;
@@ -78,10 +154,7 @@ DFL::Color Render_thread::ray_color(const DFL::Ray &ray, const Hittable &world, 
         {
             return (attenuation_color * ray_color(scattered_ray, world, depth - 1));
         }
-//        DFL::Point3d<double> target{ hit_record.point + DFL::random_in_hemisphere(hit_record.normal) }; // hit_record.normal + DFL::random_unit_vector<double>() };
-//        DFL::Color color { 0.5 * ray_color(DFL::Ray(hit_record.point, target - hit_record.point), world, depth - 1) };
 
-//        return color;
         return DFL::Color{0.0, 0.0, 0.0};
     }
 
@@ -112,34 +185,31 @@ void Render_thread::run()
 
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
-        const int samples_per_pixel{ 2 };
-        const int max_depth{ 50 };
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
-
-        Hittable_list world;
-//        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, 0.0, -1.0), 0.5));
-//        world.add(std::make_shared<Sphere>(DFL::Point3d<double>(0.0, -100.5, -1.0), 100.0));
 
         auto material_ground = std::make_shared<Lambertian>(DFL::Color(0.8, 0.8, 0.0));
         auto material_center = std::make_shared<Lambertian>(DFL::Color(0.1, 0.2, 0.5));
         auto material_left   = std::make_shared<Dielectric>(1.5);
         auto material_right  = std::make_shared<Metal>(DFL::Color(0.8, 0.6, 0.2), 1.0);
 
-        world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0, -100.5, -1.0), 100.0, material_ground));
-        world.add(make_shared<Sphere>(DFL::Point3d<double>( 0.0,    0.0, -1.0),   0.5, material_center));
-        world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
-        world.add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),  -0.4, material_left));
-        world.add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
+        world.reset();
+        world = std::make_unique<Hittable_list>();
+        world->add(make_shared<Sphere>(DFL::Point3d<double>( 0.0, -100.5, -1.0), 100.0, material_ground));
+        world->add(make_shared<Sphere>(DFL::Point3d<double>( 0.0,    0.0, -1.0),   0.5, material_center));
+        world->add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
+        world->add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),  -0.4, material_left));
+        world->add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
 
-        const auto aspect_ratio = 16.0 / 9.0;
-        DFL::Point3d<double> look_from{ 3.0, 3.0, 2.0 };
-        DFL::Point3d<double> look_at{ 0.0, 0.0, -1.0 };
-        DFL::Vector3d<double> vup{ 0.0, 1.0, 0.0 };
-        auto distance_to_focus = (look_from - look_at).length();
-        auto aperture{ 2.0 };
-        double vertical_field_of_view{ 20.0 };
+        samples_per_pixel = 10;
+        max_depth = 50;
 
         DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
+
+        QFile *file = new QFile("result_image.ppm");
+        if (!file->open(QIODevice::WriteOnly | QIODevice::Append))
+        {
+            return;
+        }
 
         for(int j = image_height - 1; j >= 0; --j)
         {
@@ -163,33 +233,43 @@ void Render_thread::run()
                     auto v = (j + DFL::random_double()) / (image_height - 1);
 
                     DFL::Ray ray{ camera.get_ray(u, v) };
-                    pixel_color += ray_color(ray, world, max_depth);
+                    pixel_color += ray_color(ray, world.get(), max_depth);
                 }
 
                 auto r{ pixel_color.x };
                 auto g{ pixel_color.y };
                 auto b{ pixel_color.z };
 
+                // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
                 if (r != r) r = 0.0;
                 if (g != g) g = 0.0;
                 if (b != b) b = 0.0;
 
                 // Divide the color by the number of samples and gamma-correct for gamma = 2.0.
                 auto scale{ 1.0 / samples_per_pixel };
-//                r *= std::sqrt(scale * r);
-//                g *= std::sqrt(scale * g);
-//                b *= std::sqrt(scale * b);
-
+                /*
+                r = std::sqrt(scale * r);
+                g = std::sqrt(scale * g);
+                b = std::sqrt(scale * b);
+                */
                 const double gamma{ 2.2 };
-                r *= std::pow((scale * r), 1.0 / gamma);
-                g *= std::pow((scale * g), 1.0 / gamma);
-                b *= std::pow((scale * b), 1.0 / gamma);
+                r = std::pow((scale * r), 1.0 / gamma);
+                g = std::pow((scale * g), 1.0 / gamma);
+                b = std::pow((scale * b), 1.0 / gamma);
 
-                pixels[ idx ] = qRgb(256 * DFL::clamp(r, 0.0, 0.999),
-                                     256 * DFL::clamp(g, 0.0, 0.999),
-                                     256 * DFL::clamp(b, 0.0, 0.999));
+                DFL::Color result_color;
 
-//                pixels[ idx ] = tonemap(_scene->camera()->get(x, y));
+                result_color.x = static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999));
+                result_color.y = static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999));
+                result_color.z = static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999));
+
+                pixels[ idx ] = qRgb(result_color.x, result_color.y, result_color.z);
+
+//                pixels[ idx ] = tonemap(pixel_color);
+
+//                DFL::Vector3d<double> tonemap_vector = Tonemap::tonemap(Tonemap::GammaOnly, DFL::max(pixel_color, DFL::Vector3d<double>(0.0f)));
+//                pixels[ idx ] = tonemap(pixel_color);
+                write_color(file, result_color, samples_per_pixel);
             }
 
             if(!is_restart)
@@ -198,6 +278,8 @@ void Render_thread::run()
                 emit rendered_image(image, progress);
             }
         }
+
+        emit finished_rendering_image();
 
         mutex.lock();
             if (!is_restart)
@@ -210,3 +292,65 @@ void Render_thread::run()
         mutex.unlock();
     }
 }
+
+void Render_thread::write_color(QIODevice *file, DFL::Color pixel_color, int samples_per_pixel)
+{
+    QTextStream out(file);
+    static int first_time{ true };
+
+    if(first_time == true)
+    {
+        out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        first_time = false;
+    }
+
+    /*
+    auto r = pixel_color.x;
+    auto g = pixel_color.y;
+    auto b = pixel_color.z;
+
+    // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
+    if (r != r) r = 0.0;
+    if (g != g) g = 0.0;
+    if (b != b) b = 0.0;
+
+    // Divide the color by the number of samples and gamma-correct for gamma=2.0.
+    auto scale = 1.0 / samples_per_pixel;
+    r = sqrt(scale * r);
+    g = sqrt(scale * g);
+    b = sqrt(scale * b);
+
+    // Write the translated [0,255] value of each color component.
+    out << static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999)) << ' '
+        << static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999)) << ' '
+        << static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)) << '\n';
+    */
+    out << static_cast<int>(pixel_color.x) << ' '
+        << static_cast<int>(pixel_color.y) << ' '
+        << static_cast<int>(pixel_color.z) << '\n';
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
