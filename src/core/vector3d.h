@@ -85,6 +85,17 @@ public:
         return *this;
     }
 
+    Vector3d<T> operator/(const Vector3d<T> &other) const
+    {
+        Vector3d<T> result;
+
+        result.x = x / other.x;
+        result.y = y / other.y;
+        result.z = z / other.z;
+
+        return result;
+    }
+
     template <typename U>
     Vector3d<T> operator /(U f) const noexcept
     {
@@ -148,6 +159,12 @@ template <typename T, typename U>
 inline Vector3d<T> operator*(U f, const Vector3d<T> &v)
 {
     return v * f;
+}
+
+template <typename T>
+inline Vector3d<T> operator*(const Vector3d<T> &u, const Vector3d<T> &v)
+{
+    return Vector3d<T>(u.x * v.x, u.y * v.y, u.z * v.z);
 }
 
 template <typename T>
@@ -255,6 +272,12 @@ inline Vector3d<T> refract(const Vector3d<T> &uv, const Vector3d<T> &n, double e
     Vector3d<T> r_out_perp =  etai_over_etat * (uv + cos_theta * n);
     Vector3d<T> r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.length_squared())) * n;
     return r_out_perp + r_out_parallel;
+}
+
+template <typename T>
+inline Vector3d<T> pow(const Vector3d<T> &v, double exp)
+{
+    return Vector3d<T>{ std::pow(v.x, exp), std::pow(v.y, exp), std::pow(v.z, exp) };
 }
 
 
