@@ -179,6 +179,16 @@ public:
         return std::sqrt(length_squared());
     }
 
+    static Point3d<T> random()
+    {
+        return Point3d<T>(random_double(), random_double(), random_double());
+    }
+
+    static Point3d<T> random(double min, double max)
+    {
+        return Point3d<T>(random_double(min, max), random_double(min, max), random_double(min, max));
+    }
+
     // Point3d Public Data
     T x, y, z;
 };
