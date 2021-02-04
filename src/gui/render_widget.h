@@ -19,7 +19,8 @@ protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 
 signals:
-    void update_progress_bar(int progress);
+    void update_gui(int progress);
+    void render_image_finished();
 
 private slots:
     void update_image(const QImage &image, int progress);

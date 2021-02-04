@@ -12,7 +12,7 @@
 
 Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
 {
-    connect(&render_thread, &Render_thread::rendered_image, this, &Render_widget::update_image);
+    connect(&render_thread, &Render_thread::rendered_image_progress, this, &Render_widget::update_image);
     connect(&render_thread, &Render_thread::finished_rendering_image, this, &Render_widget::finished_rendering_image);
 }
 
@@ -44,7 +44,7 @@ void Render_widget::update_image(const QImage &image, int progress)
 {
     pixmap = QPixmap::fromImage(image);
 
-    emit update_progress_bar(progress);
+    emit update_gui(progress);
 
     update();
 }
@@ -56,4 +56,5 @@ void Render_widget::start_render_image() noexcept
 
 void Render_widget::finished_rendering_image()
 {
+    emit render_image_finished();
 }

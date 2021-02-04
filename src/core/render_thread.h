@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QWaitCondition>
 #include <QColor>
+#include <QElapsedTimer>
 
 #include "core/geometry.h"
 
@@ -23,7 +24,7 @@ public:
     void render(uint32_t image_width, uint32_t image_height);
 
 signals:
-    void rendered_image(const QImage &image, int progress);
+    void rendered_image_progress(const QImage &image, int progress);
     void finished_rendering_image();
 
 protected:

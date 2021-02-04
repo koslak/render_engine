@@ -9,7 +9,7 @@
 
 #include <QImage>
 
-Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ DFL::Point3d<double>{ 3.0, 2.0, 8.0 } },
+Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ DFL::Point3d<double>{ 13.0, 5.0, 8.0 } },
                                                                  look_at{ DFL::Point3d<double>{ 0.0, 0.0, 0.0 } },
                                                                  vup{ DFL::Vector3d<double>{ 0.0, 1.0, 0.0 } }
 {
@@ -160,7 +160,7 @@ QRgb Render_thread::gamma_correction(const DFL::Color pixel_color, int samples_p
     b = std::sqrt(scale * b);
     */
 
-    const double gamma{ 1.2 };
+    const double gamma{ 2.2 };
     r = std::pow((scale * r), 1.0 / gamma);
     g = std::pow((scale * g), 1.0 / gamma);
     b = std::pow((scale * b), 1.0 / gamma);
@@ -192,20 +192,7 @@ void Render_thread::run()
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
-        auto material_ground = std::make_shared<Lambertian>(DFL::Color(0.8, 0.8, 0.0));
-        auto material_center = std::make_shared<Lambertian>(DFL::Color(0.1, 0.2, 0.5));
-        auto material_left   = std::make_shared<Dielectric>(1.5);
-        auto material_right  = std::make_shared<Metal>(DFL::Color(0.8, 0.6, 0.2), 1.0);
-
-        world.reset();
-        world = std::make_unique<Hittable_list>();
-        world->add(make_shared<Sphere>(DFL::Point3d<double>( 0.0, -100.5, -1.0), 100.0, material_ground));
-        world->add(make_shared<Sphere>(DFL::Point3d<double>( 0.0,    0.0, -1.0),   0.5, material_center));
-        world->add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),   0.5, material_left));
-        world->add(make_shared<Sphere>(DFL::Point3d<double>(-1.0,    0.0, -1.0),  -0.4, material_left));
-        world->add(make_shared<Sphere>(DFL::Point3d<double>( 1.0,    0.0, -1.0),   0.5, material_right));
-
-        samples_per_pixel = 10;
+        samples_per_pixel = 1;
         max_depth = 50;
 
         DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
@@ -241,7 +228,7 @@ void Render_thread::run()
             if(!is_restart)
             {
                 auto progress{ (total_pixels_image != 0) ? (idx * 100 / total_pixels_image) : 1 };
-                emit rendered_image(image, progress);
+                emit rendered_image_progress(image, progress);
             }
         }
 
