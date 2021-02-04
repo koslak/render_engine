@@ -24,6 +24,7 @@ class Hittable
 {
 public:
     virtual bool hit(const DFL::Ray &r, double t_min, double t_max, Hit_record &hit_record) const = 0;
+    virtual ~Hittable() = default;
 };
 
 #endif // HITTABLE_H
