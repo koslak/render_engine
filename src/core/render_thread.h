@@ -10,7 +10,6 @@
 #include "core/geometry.h"
 
 class QImage;
-class Ray;
 class Hittable;
 class Hittable_list;
 
@@ -49,9 +48,9 @@ private:
     int max_depth;
     std::unique_ptr<Hittable_list> world;
 
-    DFL::Point3d<double> look_from;
-    DFL::Point3d<double> look_at;
-    DFL::Vector3d<double> vup;
+    DFL::Point look_from;
+    DFL::Point look_at;
+    DFL::Vector vup;
     double distance_to_focus;
     double aperture;
     double vertical_field_of_view;

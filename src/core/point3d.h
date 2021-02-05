@@ -242,6 +242,8 @@ inline Point3d<T> normalize(const Point3d<T> &p)
     return p / p.length();
 }
 
+//using Point = Point3d<double>;
+
 } // namespace DFL
 
 #endif // Point3dD_H

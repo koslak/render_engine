@@ -4,8 +4,8 @@
 
 namespace DFL {
 
-Camera::Camera(DFL::Point3d<double> look_from, DFL::Point3d<double> look_at,
-               DFL::Vector3d<double> view_up_vector, double vertical_field_of_view,
+Camera::Camera(Point look_from, Point look_at,
+               Vector view_up_vector, double vertical_field_of_view,
                double aspect_ratio, double aperture, double focus_distance)
 {
     auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
@@ -27,15 +27,15 @@ Camera::Camera(DFL::Point3d<double> look_from, DFL::Point3d<double> look_at,
 
 Ray Camera::get_ray(double u, double v) const noexcept
 {
-    DFL::Vector3d<double> rd{ lens_radius * DFL::random_in_unit_disk<double>() };
-    DFL::Vector3d<double> offset{ u * rd.x + v * rd.y };
+    Vector rd{ lens_radius * DFL::random_in_unit_disk<double>() };
+    Vector offset{ u * rd.x + v * rd.y };
 
-    return DFL::Ray(origin + offset, lower_left_corner + u * horizontal + v * vertical - origin - offset);
+    return Ray(origin + offset, lower_left_corner + u * horizontal + v * vertical - origin - offset);
 }
 
-double hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& r) noexcept
+double hit_sphere(const Point& center, double radius, const Ray& r) noexcept
 {
-    DFL::Vector3d<double> oc = r.origin - center;
+    Vector oc = r.origin - center;
     auto a = r.direction.length_squared();
     auto half_b = dot(oc, r.direction);
     auto c = oc.length_squared() - radius * radius;
@@ -55,11 +55,11 @@ double hit_sphere(const DFL::Point3d<double>& center, double radius, const Ray& 
 Color Camera::ray_color(const Ray& ray) noexcept
 {
     double sphere_radius{0.5};
-    auto t = hit_sphere(DFL::Point3d<double>(0.0, 0.0, -1.0), sphere_radius, ray);
+    auto t = hit_sphere(Point(0.0, 0.0, -1.0), sphere_radius, ray);
     if(t > 0.0)
     {
-        DFL::Point3d<double> N = normalize( ray(t) - DFL::Vector3d<double>(0.0, 0.0, -1.0) );
-        DFL::Color sphere_color{N.x + 1, N.y + 1, N.z + 1};
+        Point N = normalize( ray(t) - Vector(0.0, 0.0, -1.0) );
+        Color sphere_color{N.x + 1, N.y + 1, N.z + 1};
         sphere_color *= 0.5;
         sphere_color *= 255.999;
 

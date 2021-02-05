@@ -7,13 +7,13 @@ class Material;
 
 struct Hit_record
 {
-    DFL::Point3d<double> point;
-    DFL::Vector3d<double> normal;
+    DFL::Point point;
+    DFL::Vector normal;
     std::shared_ptr<Material> material_ptr;
     double t;
     bool front_face;
 
-    inline void set_face_normal(const DFL::Ray &ray, const DFL::Vector3d<double> outward_normal)
+    inline void set_face_normal(const DFL::Ray &ray, const DFL::Vector outward_normal)
     {
         front_face = dot(ray.direction, outward_normal) < 0.0;
         normal = front_face ? outward_normal : -outward_normal;

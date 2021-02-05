@@ -2,10 +2,13 @@
 #define RAY_H
 
 #include "core/dfl.h"
-
 #include "core/point3d.h"
 
 namespace DFL {
+
+using Color = Point3d<double>;
+using Point = Point3d<double>;
+using Vector = Vector3d<double>;
 
 class Ray
 {
@@ -22,8 +25,8 @@ public:
         return os;
     }
 
-    Point3d<double> origin;
-    Vector3d<double> direction;
+    Point origin;
+    Vector direction;
 };
 
 } // namespace DFL

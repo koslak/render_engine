@@ -6,20 +6,22 @@
 
 struct Hit_record;
 
+using namespace DFL;
+
 class Material
 {
 public:
-    virtual bool scatter(const DFL::Ray &ray_in, const Hit_record &hit_record, DFL::Color &attenuation_color, DFL::Ray &scattered_ray) const = 0;
+    virtual bool scatter(const Ray &ray_in, const Hit_record &hit_record, Color &attenuation_color, Ray &scattered_ray) const = 0;
 };
 
 class Lambertian : public Material
 {
 public:
-    Lambertian(const DFL::Color &albedo_color) : albedo_color(albedo_color) {}
+    Lambertian(const Color &albedo_color) : albedo_color(albedo_color) {}
 
-    virtual bool scatter(const DFL::Ray &, const Hit_record &hit_record, DFL::Color &attenuation_color, DFL::Ray &scattered_ray) const override
+    virtual bool scatter(const Ray &, const Hit_record &hit_record, Color &attenuation_color, Ray &scattered_ray) const override
     {
-        DFL::Vector3d<double> scatter_direction{ hit_record.normal + DFL::random_unit_vector<double>() };
+        Vector scatter_direction{ hit_record.normal + DFL::random_unit_vector<double>() };
 
         // Catch degenerate scatter direction
         if( scatter_direction.near_zero() )
@@ -27,30 +29,30 @@ public:
             scatter_direction = hit_record.normal;
         }
 
-        scattered_ray = DFL::Ray(hit_record.point, scatter_direction);
+        scattered_ray = Ray(hit_record.point, scatter_direction);
         attenuation_color = albedo_color;
 
         return true;
     }
 
-    DFL::Color albedo_color;
+    Color albedo_color;
 };
 
 class Metal : public Material
 {
 public:
-    Metal(const DFL::Color &albedo_color, double fuzzy) : albedo_color(albedo_color), fuzz(fuzzy < 1 ? fuzzy : 1) {}
+    Metal(const Color &albedo_color, double fuzzy) : albedo_color(albedo_color), fuzz(fuzzy < 1 ? fuzzy : 1) {}
 
-    virtual bool scatter(const DFL::Ray &ray_in, const Hit_record &hit_record, DFL::Color &attenuation_color, DFL::Ray &scattered_ray) const override
+    virtual bool scatter(const Ray &ray_in, const Hit_record &hit_record, Color &attenuation_color, Ray &scattered_ray) const override
     {
-        DFL::Vector3d<double> reflected{ DFL::reflect(DFL::normalize(ray_in.direction), hit_record.normal) };
-        scattered_ray = DFL::Ray(hit_record.point, reflected + fuzz * DFL::random_in_unit_sphere<double>());
+        Vector reflected{ DFL::reflect(DFL::normalize(ray_in.direction), hit_record.normal) };
+        scattered_ray = Ray(hit_record.point, reflected + fuzz * DFL::random_in_unit_sphere<double>());
         attenuation_color = albedo_color;
 
         return (DFL::dot(scattered_ray.direction, hit_record.normal) > 0);
     }
 
-    DFL::Color albedo_color;
+    Color albedo_color;
     double fuzz;
 };
 
@@ -59,17 +61,17 @@ class Dielectric : public Material
 public:
     Dielectric(double index_of_refraction) : index_of_refraction{index_of_refraction} {}
 
-    virtual bool scatter(const DFL::Ray &ray_in, const Hit_record &hit_record, DFL::Color &attenuation_color, DFL::Ray &scattered_ray) const override
+    virtual bool scatter(const Ray &ray_in, const Hit_record &hit_record, Color &attenuation_color, Ray &scattered_ray) const override
     {
-        attenuation_color = DFL::Color{1.0, 1.0, 1.0};
+        attenuation_color = Color{1.0, 1.0, 1.0};
         double refraction_ratio{ hit_record.front_face ? (1.0 / index_of_refraction) : index_of_refraction };
 
-        DFL::Vector3d<double> unit_direction{ DFL::normalize(ray_in.direction) };
+        Vector unit_direction{ DFL::normalize(ray_in.direction) };
         double cos_theta{ std::fmin(DFL::dot(-unit_direction, hit_record.normal), 1.0) };
         double sin_theta{ std::sqrt(1.0 - cos_theta * cos_theta) };
 
         bool cannot_refract{ refraction_ratio * sin_theta > 1.0 };
-        DFL::Vector3d<double> direction_vector;
+        Vector direction_vector;
 
         if(cannot_refract || reflectance(cos_theta, refraction_ratio) > DFL::random_double())
         {
@@ -78,7 +80,7 @@ public:
             direction_vector = DFL::refract(unit_direction, hit_record.normal, refraction_ratio);
         }
 
-        scattered_ray = DFL::Ray{ hit_record.point, direction_vector };
+        scattered_ray = Ray{ hit_record.point, direction_vector };
 
         return true;
     }

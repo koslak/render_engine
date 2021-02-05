@@ -244,11 +244,11 @@ inline Vector3d<T> random_in_hemisphere(const Vector3d<T> &normal)
 }
 
 template <typename T>
-DFL::Vector3d<double> random_in_unit_disk()
+DFL::Vector3d<T> random_in_unit_disk()
 {
     while (true)
     {
-        auto p = DFL::Vector3d<double>(random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0);
+        auto p = DFL::Vector3d<T>(random_double(-1.0, 1.0), random_double(-1.0, 1.0), 0.0);
 
         if(p.length_squared() >= 1)
         {
@@ -279,6 +279,8 @@ inline Vector3d<T> pow(const Vector3d<T> &v, double exp)
 {
     return Vector3d<T>{ std::pow(v.x, exp), std::pow(v.y, exp), std::pow(v.z, exp) };
 }
+
+//using Vector = Vector3d<double>;
 
 
 } // namespace DFL
