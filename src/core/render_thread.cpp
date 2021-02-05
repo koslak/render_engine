@@ -192,7 +192,7 @@ void Render_thread::run()
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
-        samples_per_pixel = 1;
+        samples_per_pixel = 500;
         max_depth = 50;
 
         DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
