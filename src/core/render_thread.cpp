@@ -160,13 +160,6 @@ QRgb Render_thread::gamma_correction(const Color pixel_color, int samples_per_pi
     g = std::sqrt(scale * g);
     b = std::sqrt(scale * b);
 
-    /*
-    const double gamma{ 2.2 };
-    r = std::pow((scale * r), 1.0 / gamma);
-    g = std::pow((scale * g), 1.0 / gamma);
-    b = std::pow((scale * b), 1.0 / gamma);
-    */
-
     return qRgb(static_cast<int>(256 * DFL::clamp(r, 0.0, 0.999)),
                 static_cast<int>(256 * DFL::clamp(g, 0.0, 0.999)),
                 static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)));
@@ -194,7 +187,7 @@ void Render_thread::run()
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
-        samples_per_pixel = 500;
+        samples_per_pixel = 1;
         max_depth = 50;
 
         DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
