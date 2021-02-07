@@ -5,7 +5,8 @@
 
 #include "cameras/camera.h"
 #include "core/geometry.h"
-#include "core/render_thread.h"
+
+class Render_thread;
 
 class Render_widget : public QWidget
 {
@@ -27,7 +28,7 @@ private slots:
     void finished_rendering_image();
 
 private:
-    Render_thread render_thread;
+    std::unique_ptr<Render_thread> render_thread;
 
     QPixmap pixmap;
     uint32_t image_width{ 1 };

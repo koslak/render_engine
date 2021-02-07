@@ -9,11 +9,14 @@
 #include <memory>
 
 #include "core/geometry.h"
+#include "core/render_thread.h"
 
 Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
 {
-    connect(&render_thread, &Render_thread::rendered_image_progress, this, &Render_widget::update_image);
-    connect(&render_thread, &Render_thread::finished_rendering_image, this, &Render_widget::finished_rendering_image);
+    render_thread = std::make_unique<Render_thread>();
+
+    connect(render_thread.get(), &Render_thread::rendered_image_progress, this, &Render_widget::update_image);
+    connect(render_thread.get(), &Render_thread::finished_rendering_image, this, &Render_widget::finished_rendering_image);
 }
 
 void Render_widget::paintEvent(QPaintEvent */*event*/)
@@ -51,7 +54,7 @@ void Render_widget::update_image(const QImage &image, int progress)
 
 void Render_widget::start_render_image() noexcept
 {
-    render_thread.render(image_width, image_height);
+    render_thread->render(image_width, image_height);
 }
 
 void Render_widget::finished_rendering_image()
