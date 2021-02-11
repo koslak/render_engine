@@ -24,6 +24,8 @@ private:
     double lens_radius;
 };
 
+Camera *create_camera(/*const ParamSet &params*/) noexcept;
+
 } // namespace DFL
 
 #endif // CAMERA_H

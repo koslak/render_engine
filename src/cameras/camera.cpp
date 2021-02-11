@@ -75,4 +75,18 @@ Color Camera::ray_color(const Ray& ray) noexcept
     return color;
 }
 
+Camera *create_camera(/*const ParamSet &params*/) noexcept
+{
+    double aspect_ratio = 16.0 / 9.0;
+    double distance_to_focus = 10.0;
+    double aperture = 0.1;
+    double vertical_field_of_view = 20.0;
+
+    Point look_from{ 13.0, 15.0, 8.0 };
+    Point look_at{ 0.0, 0.0, 0.0 };
+    Vector vup{ 0.0, 1.0, 0.0 };
+
+    return new Camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
+}
+
 } // namespace DFL
