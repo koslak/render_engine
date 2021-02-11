@@ -48,6 +48,8 @@ set(CORE_SOURCE
     src/core/point3d.cpp
     src/core/render_thread.cpp
     src/cameras/camera.cpp
+    src/core/api.cpp
+    src/core/scene.cpp
   )
 
 set(CORE_HEADERS
@@ -64,6 +66,8 @@ set(CORE_HEADERS
     src/core/sphere.h
     src/cameras/camera.h
     src/core/material.h
+    src/core/api.h
+    src/core/scene.h
   )
 
 set(ALL_SRC_CODE ${CORE_SOURCE} ${CORE_HEADERS})
