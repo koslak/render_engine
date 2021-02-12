@@ -3,27 +3,17 @@
 #include "core/geometry.h"
 #include "cameras/camera.h"
 #include "core/hittable.h"
-#include "core/hittable_list.h"
-#include "core/sphere.h"
+#include "core/scene.h"
 #include "core/material.h"
 
 #include <QImage>
 
 using namespace DFL;
 
-Render_thread::Render_thread(QObject *parent) : QThread(parent), look_from{ Point{ 13.0, 5.0, 8.0 } },
-                                                                 look_at{ Point{ 0.0, 0.0, 0.0 } },
-                                                                 vup{ Vector{ 0.0, 1.0, 0.0 } }
+Render_thread::Render_thread(QObject *parent) : QThread(parent)
 {
-    world = std::make_unique<Hittable_list>( generate_random_scene() );
-
-    aspect_ratio = 16.0 / 9.0;
     samples_per_pixel = 50;
     max_depth = 50;
-
-    distance_to_focus = 10.0;
-    aperture = 0.1;
-    vertical_field_of_view = 20.0;
 }
 
 Render_thread::~Render_thread()
@@ -45,9 +35,12 @@ Render_thread::~Render_thread()
     wait();
 }
 
-void Render_thread::render(uint32_t image_width, uint32_t image_height)
+void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *scene_var, Camera *camera_var)
 {
     QMutexLocker mutex_locker(&mutex);
+
+    scene = scene_var;
+    camera = camera_var;
 
     this->image_width = image_width;
     this->image_height = image_height;
@@ -59,57 +52,6 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height)
         is_restart = true;
         wait_condition.wakeOne();
     }
-}
-
-Hittable_list Render_thread::generate_random_scene()
-{
-    Hittable_list world;
-
-    auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
-    world.add(std::make_shared<Sphere>(DFL::Point(0,-1000,0), 1000, ground_material));
-
-    for (int a = -11; a < 11; a++)
-    {
-        for (int b = -11; b < 11; b++)
-        {
-            auto choose_mat = DFL::random_double();
-            Point center{ a + 0.9 * DFL::random_double(), 0.2, b + 0.9 * DFL::random_double() };
-
-            if ((center - Point(4, 0.2, 0)).length() > 0.9)
-            {
-                std::shared_ptr<Material> sphere_material;
-
-                if(choose_mat < 0.8)
-                {
-                    // diffuse
-                    Color albedo = Color::random() * Color::random();
-                    sphere_material = std::make_shared<Lambertian>(albedo);
-                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
-                } else if (choose_mat < 0.95) {
-                    // metal
-                    Color albedo = Color::random(0.5, 1);
-                    auto fuzz = DFL::random_double(0, 0.5);
-                    sphere_material = std::make_shared<Metal>(albedo, fuzz);
-                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
-                } else {
-                    // glass
-                    sphere_material = std::make_shared<Dielectric>(1.5);
-                    world.add(std::make_shared<Sphere>(center, 0.2, sphere_material));
-                }
-            }
-        }
-    }
-
-    auto material1 = std::make_shared<Dielectric>(1.5);
-    world.add(std::make_shared<Sphere>(Point(0, 1, 0), 1.0, material1));
-
-    auto material2 = std::make_shared<Lambertian>(Color(0.4, 0.2, 0.1));
-    world.add(std::make_shared<Sphere>(Point(-4, 1, 0), 1.0, material2));
-
-    auto material3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
-    world.add(std::make_shared<Sphere>(Point(4, 1, 0), 1.0, material3));
-
-    return world;
 }
 
 Color Render_thread::ray_color(const Ray &ray, Hittable *world, int depth) noexcept
@@ -165,6 +107,20 @@ QRgb Render_thread::gamma_correction(const Color pixel_color, int samples_per_pi
                 static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)));
 }
 
+void Render_thread::set_scene() noexcept
+{
+    QMutexLocker mutex_locker(&mutex);
+
+    world = scene->create_world(Scene::Type::Advanced);
+
+    Point look_from{ 13.0, 15.0, 8.0 };
+    Point look_at{ 0.0, 0.0, 0.0 };
+    camera->set_camera_direction(look_from, look_at, 90);
+
+    samples_per_pixel = 1;
+    max_depth = 5;
+}
+
 // The function body is an infinite loop which starts by storing the rendering parameters
 // in local variables. As usual, we protect accesses to the member variables using the
 // class's mutex. Storing the member variables in local variables allows us to minimize
@@ -187,10 +143,7 @@ void Render_thread::run()
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
 
-        samples_per_pixel = 1;
-        max_depth = 50;
-
-        DFL::Camera camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
+        set_scene();
 
         for(int j = image_height - 1; j >= 0; --j)
         {
@@ -213,7 +166,7 @@ void Render_thread::run()
                     auto u = (i + DFL::random_double()) / (image_width - 1);
                     auto v = (j + DFL::random_double()) / (image_height - 1);
 
-                    Ray ray{ camera.get_ray(u, v) };
+                    Ray ray{ camera->get_ray(u, v) };
                     pixel_color += ray_color(ray, world.get(), max_depth);
                 }
 

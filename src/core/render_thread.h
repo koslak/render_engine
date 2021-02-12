@@ -13,6 +13,12 @@ class QImage;
 class Hittable;
 class Hittable_list;
 
+namespace DFL
+{
+    class Scene;
+    class Camera;
+}
+
 class Render_thread : public QThread
 {
     Q_OBJECT
@@ -20,7 +26,7 @@ public:
     Render_thread(QObject *parent = nullptr);
     ~Render_thread();
 
-    void render(uint32_t image_width, uint32_t image_height);
+    void render(uint32_t image_width, uint32_t image_height, DFL::Scene *scene_var, DFL::Camera *camera_var);
 
 signals:
     void rendered_image_progress(const QImage &image, int progress);
@@ -39,21 +45,16 @@ private:
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
 
-    Hittable_list generate_random_scene();
+    DFL::Scene *scene;
+    DFL::Camera *camera;
+
+    void set_scene() noexcept;
     DFL::Color ray_color(const DFL::Ray &ray, Hittable *world, int depth) noexcept;
     QRgb gamma_correction(const DFL::Color pixel_color, int samples_per_pixel) const noexcept;
 
-    double aspect_ratio;
     int samples_per_pixel;
     int max_depth;
-    std::unique_ptr<Hittable_list> world;
-
-    DFL::Point look_from;
-    DFL::Point look_at;
-    DFL::Vector vup;
-    double distance_to_focus;
-    double aperture;
-    double vertical_field_of_view;
+    std::unique_ptr<Hittable> world;
 };
 
 #endif // RENDER_THREAD_H
