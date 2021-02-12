@@ -4,9 +4,14 @@
 
 namespace DFL {
 
-Camera::Camera(Point look_from, Point look_at,
-               Vector view_up_vector, double vertical_field_of_view,
-               double aspect_ratio, double aperture, double focus_distance)
+Camera::Camera(Point look_from, Point look_at, double vertical_field_of_view,
+               Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance)
+{
+    initialize_camera(look_from, look_at, vertical_field_of_view, view_up_vector, aspect_ratio, aperture, focus_distance);
+}
+
+void Camera::initialize_camera(Point look_from, Point look_at, double vertical_field_of_view,
+                               Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance) noexcept
 {
     auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
     auto h{ theta / 2 };
@@ -75,7 +80,12 @@ Color Camera::ray_color(const Ray& ray) noexcept
     return color;
 }
 
-Camera *create_camera(/*const ParamSet &params*/) noexcept
+void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double vertical_field_of_view) noexcept
+{
+    initialize_camera(look_from, look_at, vertical_field_of_view);
+}
+
+Camera *create_camera() noexcept
 {
     double aspect_ratio = 16.0 / 9.0;
     double distance_to_focus = 10.0;
@@ -86,7 +96,7 @@ Camera *create_camera(/*const ParamSet &params*/) noexcept
     Point look_at{ 0.0, 0.0, 0.0 };
     Vector vup{ 0.0, 1.0, 0.0 };
 
-    return new Camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
+    return new Camera{ look_from, look_at, vertical_field_of_view, vup, aspect_ratio, aperture, distance_to_focus };
 }
 
 } // namespace DFL
