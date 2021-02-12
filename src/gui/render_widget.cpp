@@ -8,12 +8,20 @@
 
 #include <memory>
 
+#include "core/api.h"
 #include "core/geometry.h"
 #include "core/render_thread.h"
+#include "core/scene.h"
+#include "cameras/camera.h"
+
+using namespace DFL;
+
+Render_widget::~Render_widget() = default;
 
 Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
 {
     render_thread = std::make_unique<Render_thread>();
+    render_options = std::make_unique<DFL::Render_options>();
 
     connect(render_thread.get(), &Render_thread::rendered_image_progress, this, &Render_widget::update_image);
     connect(render_thread.get(), &Render_thread::finished_rendering_image, this, &Render_widget::finished_rendering_image);
@@ -54,7 +62,10 @@ void Render_widget::update_image(const QImage &image, int progress)
 
 void Render_widget::start_render_image() noexcept
 {
-    render_thread->render(image_width, image_height);
+    std::unique_ptr<Scene> scene(render_options->make_scene());
+    std::unique_ptr<Camera> camera(render_options->make_camera());
+
+    render_thread->render(image_width, image_height, scene.get(), camera.get());
 }
 
 void Render_widget::finished_rendering_image()

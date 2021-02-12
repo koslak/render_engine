@@ -7,9 +7,9 @@
 
 namespace DFL {
 
-std::unique_ptr<Hittable_list> Scene::create_world(Scene::Type scene_type) noexcept
+std::unique_ptr<Hittable> Scene::create_world(Scene::Type scene_type) noexcept
 {
-    std::unique_ptr<Hittable_list> world{ nullptr };
+    std::unique_ptr<Hittable> world{ nullptr };
 
     switch(scene_type)
     {
@@ -29,36 +29,36 @@ std::unique_ptr<Hittable_list> Scene::create_world(Scene::Type scene_type) noexc
     return world;
 }
 
-std::unique_ptr<Hittable_list> Scene::create_basic_world() noexcept
+std::unique_ptr<Hittable> Scene::create_basic_world() noexcept
 {
-    Hittable_list *world = new Hittable_list;
+    Hittable *world = new Hittable_list;
 
-    return std::unique_ptr<Hittable_list>(world);
+    return std::unique_ptr<Hittable>(world);
 }
 
-std::unique_ptr<Hittable_list> Scene::create_advanced_world() noexcept
+std::unique_ptr<Hittable> Scene::create_advanced_world() noexcept
 {
     Hittable_list *world = new Hittable_list;
 
     auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
-    auto material_center = std::make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
-    auto material_left   = std::make_shared<Metal>(Color(0.8, 0.8, 0.8));
-    auto material_right  = std::make_shared<Metal>(Color(0.8, 0.6, 0.2));
+    auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+    auto material_left   = std::make_shared<Metal>(Color(0.8, 0.8, 0.8), 0.0);
+    auto material_right  = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
 
     world->add(make_shared<Sphere>(Point( 0.0, -100.5, -1.0), 100.0, material_ground));
     world->add(make_shared<Sphere>(Point( 0.0,    0.0, -1.0),   0.5, material_center));
     world->add(make_shared<Sphere>(Point(-1.0,    0.0, -1.0),   0.5, material_left));
     world->add(make_shared<Sphere>(Point( 1.0,    0.0, -1.0),   0.5, material_right));
 
-    return std::unique_ptr<Hittable_list>(world);
+    return std::unique_ptr<Hittable>(world);
 }
 
-std::unique_ptr<Hittable_list> Scene::create_complex_world() noexcept
+std::unique_ptr<Hittable> Scene::create_complex_world() noexcept
 {
     Hittable_list *world = new Hittable_list;
 
     auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
-    world->add(std::make_shared<Sphere>(DFL::Point(0,-1000,0), 1000, ground_material));
+    world->add(std::make_shared<Sphere>(DFL::Point(0, -1000, 0), 1000, ground_material));
 
     for (int a = -11; a < 11; a++)
     {
@@ -101,7 +101,7 @@ std::unique_ptr<Hittable_list> Scene::create_complex_world() noexcept
     auto material3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
     world->add(std::make_shared<Sphere>(Point(4, 1, 0), 1.0, material3));
 
-    return std::unique_ptr<Hittable_list>(world);
+    return std::unique_ptr<Hittable>(world);
 }
 
 } // namespace DFL
