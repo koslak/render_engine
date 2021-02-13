@@ -7,6 +7,8 @@ class Render_thread;
 
 namespace DFL {
     class Render_options;
+    class Scene;
+    class Camera;
 }
 
 class Render_widget : public QWidget
@@ -33,6 +35,8 @@ private slots:
 private:
     std::unique_ptr<Render_thread> render_thread;
     std::unique_ptr<DFL::Render_options> render_options;
+    std::unique_ptr<DFL::Scene> scene;
+    std::unique_ptr<DFL::Camera> camera;
 
     QPixmap pixmap;
     uint32_t image_width{ 1 };

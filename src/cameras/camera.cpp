@@ -8,7 +8,7 @@ Camera::Camera()
 {
     double aspect_ratio = 16.0 / 9.0;
     double aperture = 2.0;
-    double vertical_field_of_view = 20.0;
+    double vertical_field_of_view = 50.0;
 
     Point look_from{ 3.0, 3.0, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
@@ -22,6 +22,7 @@ Camera::Camera(Point look_from, Point look_at,
                Vector view_up_vector, double vertical_field_of_view,
                double aspect_ratio, double aperture, double focus_distance)
 {
+    /*
     auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
     auto h{ theta / 2 };
     auto viewport_height = 2.0 * h;
@@ -37,6 +38,8 @@ Camera::Camera(Point look_from, Point look_at,
     lower_left_corner = origin - horizontal/2 - vertical/2 - focus_distance * w;
 
     lens_radius = aperture / 2;
+    */
+    initialize_camera(look_from, look_at, focus_distance, vertical_field_of_view, view_up_vector, aspect_ratio, aperture);
 }
 
 void Camera::initialize_camera(Point look_from, Point look_at, double focus_distance, double vertical_field_of_view,
@@ -118,9 +121,9 @@ Color Camera::ray_color(const Ray& ray) noexcept
     return color;
 }
 
-void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double vertical_field_of_view) noexcept
+void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double distance_to_focus) noexcept
 {
-    initialize_camera(look_from, look_at, vertical_field_of_view);
+    initialize_camera(look_from, look_at, distance_to_focus);
 }
 
 } // namespace DFL

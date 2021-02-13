@@ -20,6 +20,9 @@ Render_widget::~Render_widget() = default;
 
 Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
 {
+    scene = render_options->make_scene();
+    camera = render_options->make_camera();
+
     render_thread = std::make_unique<Render_thread>();
     render_options = std::make_unique<DFL::Render_options>();
 
@@ -62,9 +65,6 @@ void Render_widget::update_image(const QImage &image, int progress)
 
 void Render_widget::start_render_image() noexcept
 {
-    std::unique_ptr<Scene> scene(render_options->make_scene());
-    std::unique_ptr<Camera> camera(render_options->make_camera());
-
     render_thread->render(image_width, image_height, scene.get(), camera.get());
 }
 
