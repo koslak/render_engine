@@ -115,11 +115,12 @@ void Render_thread::set_scene() noexcept
 
     Point look_from{ 3.0, 3.0, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
-    double focus_distance = 80;
+    double focus_distance{ 10.0 };
+    double aperture{ 0.1 };
 
-    camera->set_camera_direction(look_from, look_at, focus_distance);
+    camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
 
-    samples_per_pixel = 1;
+    samples_per_pixel = 5;
     max_depth = 5;
 }
 

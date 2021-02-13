@@ -15,14 +15,14 @@ public:
 
     void initialize_camera(Point look_from, Point look_at,
                            double focus_distance,
+                           double aperture,
                            double vertical_field_of_view = 50.0,
                            Vector view_up_vector = Vector{ 0.0, 1.0, 0.0 },
-                           double aspect_ratio = (16.0 / 9.0),
-                           double aperture = 2.0) noexcept;
+                           double aspect_ratio = (16.0 / 9.0)) noexcept;
 
     Ray get_ray(double u, double v) const noexcept;
     Color ray_color(const Ray& ray) noexcept;
-    void set_camera_direction(const Point &look_from, const Point &look_at, double distance_to_focus) noexcept;
+    void set_camera_direction(const Point &look_from, const Point &look_at, double distance_to_focus, double aperture) noexcept;
 
 private:
     Point origin;

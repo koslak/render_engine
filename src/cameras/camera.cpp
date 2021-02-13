@@ -15,45 +15,19 @@ Camera::Camera()
     Vector view_up_vector{ 0.0, 1.0, 0.0 };
     double focus_distance = 30.0;
 
-    initialize_camera(look_from, look_at, focus_distance, vertical_field_of_view, view_up_vector, aspect_ratio, aperture);
+    initialize_camera(look_from, look_at, focus_distance, aperture, vertical_field_of_view, view_up_vector, aspect_ratio);
 }
 
 Camera::Camera(Point look_from, Point look_at,
                Vector view_up_vector, double vertical_field_of_view,
-               double aspect_ratio, double aperture, double focus_distance)
+               double aspect_ratio, double focus_distance, double aperture)
 {
-    /*
-    auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
-    auto h{ theta / 2 };
-    auto viewport_height = 2.0 * h;
-    auto viewport_width = aspect_ratio * viewport_height;
-
-    w = DFL::normalize(look_from - look_at);
-    u = DFL::normalize(DFL::cross(view_up_vector, w));
-    v = DFL::cross(w, u);
-
-    origin = look_from;
-    horizontal = focus_distance * viewport_width * u;
-    vertical = focus_distance * viewport_height * v;
-    lower_left_corner = origin - horizontal/2 - vertical/2 - focus_distance * w;
-
-    lens_radius = aperture / 2;
-    */
-    initialize_camera(look_from, look_at, focus_distance, vertical_field_of_view, view_up_vector, aspect_ratio, aperture);
+    initialize_camera(look_from, look_at, focus_distance, aperture, vertical_field_of_view, view_up_vector, aspect_ratio);
 }
 
-void Camera::initialize_camera(Point look_from, Point look_at, double focus_distance, double vertical_field_of_view,
-                               Vector view_up_vector, double aspect_ratio, double aperture) noexcept
+void Camera::initialize_camera(Point look_from, Point look_at, double focus_distance, double aperture, double vertical_field_of_view,
+                               Vector view_up_vector, double aspect_ratio) noexcept
 {
-    std::cout << "Look from: " << look_from << " "
-              << "Look at: " << look_at << " "
-              << "View Up Vector" << view_up_vector << " "
-              << "Focus Distance: " << focus_distance << " "
-              << "Vertical Field of View: " << vertical_field_of_view << " "
-              << "Aspect Ratio: " << aspect_ratio << " "
-              << "Aperture: " << aperture
-              << "\n";
-
     auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
     auto h{ theta / 2 };
     auto viewport_height = 2.0 * h;
@@ -121,9 +95,9 @@ Color Camera::ray_color(const Ray& ray) noexcept
     return color;
 }
 
-void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double distance_to_focus) noexcept
+void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double distance_to_focus, double aperture) noexcept
 {
-    initialize_camera(look_from, look_at, distance_to_focus);
+    initialize_camera(look_from, look_at, distance_to_focus, aperture);
 }
 
 } // namespace DFL
