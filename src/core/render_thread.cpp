@@ -45,6 +45,8 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *s
     this->image_width = image_width;
     this->image_height = image_height;
 
+    set_scene();
+
     if(!isRunning())
     {
         start(LowPriority);
@@ -109,13 +111,11 @@ QRgb Render_thread::gamma_correction(const Color pixel_color, int samples_per_pi
 
 void Render_thread::set_scene() noexcept
 {
-    QMutexLocker mutex_locker(&mutex);
-
     world = scene->create_world(Scene::Type::Advanced);
 
-    Point look_from{ 13.0, 15.0, 8.0 };
-    Point look_at{ 0.0, 0.0, 0.0 };
-    camera->set_camera_direction(look_from, look_at, 90);
+    Point look_from{ 3.0, 3.0, 2.0 };
+    Point look_at{ 0.0, 0.0, -1.0 };
+    camera->set_camera_direction(look_from, look_at, 70);
 
     samples_per_pixel = 1;
     max_depth = 5;
@@ -142,8 +142,6 @@ void Render_thread::run()
         // Create image
         QImage image(QSize(image_width, image_height), QImage::Format_ARGB32);
         QRgb *pixels = reinterpret_cast<QRgb *>(image.bits());
-
-        set_scene();
 
         for(int j = image_height - 1; j >= 0; --j)
         {

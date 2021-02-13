@@ -7,12 +7,21 @@ namespace DFL {
 Camera::Camera(Point look_from, Point look_at, double vertical_field_of_view,
                Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance)
 {
-    initialize_camera(look_from, look_at, vertical_field_of_view, view_up_vector, aspect_ratio, aperture, focus_distance);
+    initialize_camera(look_from, look_at, focus_distance, vertical_field_of_view, view_up_vector, aspect_ratio, aperture);
 }
 
-void Camera::initialize_camera(Point look_from, Point look_at, double vertical_field_of_view,
-                               Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance) noexcept
+void Camera::initialize_camera(Point look_from, Point look_at, double focus_distance, double vertical_field_of_view,
+                               Vector view_up_vector, double aspect_ratio, double aperture) noexcept
 {
+    std::cout << "Look from: " << look_from << " "
+              << "Look at: " << look_at << " "
+              << "View Up Vector" << view_up_vector << " "
+              << "Focus Distance: " << focus_distance << " "
+              << "Vertical Field of View: " << vertical_field_of_view << " "
+              << "Aspect Ratio: " << aspect_ratio << " "
+              << "Aperture: " << aperture
+              << "\n";
+
     auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
     auto h{ theta / 2 };
     auto viewport_height = 2.0 * h;
@@ -88,12 +97,12 @@ void Camera::set_camera_direction(const Point &look_from, const Point &look_at, 
 Camera *create_camera() noexcept
 {
     double aspect_ratio = 16.0 / 9.0;
-    double distance_to_focus = 10.0;
-    double aperture = 0.1;
+    double distance_to_focus = 70.0;
+    double aperture = 2.0;
     double vertical_field_of_view = 20.0;
 
-    Point look_from{ 13.0, 15.0, 8.0 };
-    Point look_at{ 0.0, 0.0, 0.0 };
+    Point look_from{ 3.0, 3.0, 2.0 };
+    Point look_at{ 0.0, 0.0, -1.0 };
     Vector vup{ 0.0, 1.0, 0.0 };
 
     return new Camera{ look_from, look_at, vertical_field_of_view, vup, aspect_ratio, aperture, distance_to_focus };

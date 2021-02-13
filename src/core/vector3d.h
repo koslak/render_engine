@@ -3,6 +3,9 @@
 
 #include "core/dfl.h"
 
+#define BOOST_STACKTRACE_USE_ADDR2LINE
+#include <boost/stacktrace.hpp>
+
 namespace DFL {
 
 template<typename T>
@@ -99,6 +102,10 @@ public:
     template <typename U>
     Vector3d<T> operator /(U f) const noexcept
     {
+        if(f == 0)
+        {
+            std::cerr << boost::stacktrace::stacktrace() << std::endl;
+        }
         assertm(f != 0, "The parameter f is zero. Division by zero is not allowed");
         double inv = static_cast<double>(1) / f;
 
@@ -108,6 +115,10 @@ public:
     template <typename U>
     Vector3d<T> &operator/=(U f) noexcept
     {
+        if(f == 0)
+        {
+            std::cerr << boost::stacktrace::stacktrace() << std::endl;
+        }
         assertm(f != 0, "The parameter f is zero. Division by zero is not allowed");
         double inv = static_cast<double>(1) / f;
 
@@ -204,6 +215,11 @@ inline Vector3d<T> cross(const Vector3d<T> &v1, const Vector3d<T> &v2)
 template <typename T>
 inline Vector3d<T> normalize(const Vector3d<T> &v)
 {
+    if(v.length() == 0.0)
+    {
+        std::cerr << "Vector Length is zero: " << v.length() << std::endl;
+        std::cerr << "Vector: (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+    }
     return v / v.length();
 }
 

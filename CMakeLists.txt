@@ -103,8 +103,12 @@ target_compile_options(${PROJECT_CODE_NAME}_library PRIVATE -fPIC)
 
 target_link_libraries(${PROJECT_CODE_NAME}_executable            # target
                       PUBLIC ${PROJECT_CODE_NAME}_library        # item: library
-                      PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)    # item: library
-
+                      PRIVATE Qt${QT_VERSION_MAJOR}::Widgets     # item: library
+                      PUBLIC ${Boost_STACKTRACE_BASIC_LIBRARY}
+                      PUBLIC ${Boost_STACKTRACE_BACKTRACE_LIBRARY}
+                      PUBLIC ${Boost_STACKTRACE_ADDR2LINE_LIBRARY}
+                      PUBLIC ${Boost_STACKTRACE_NOOP_LIBRARY}
+                      PUBLIC pthread dl)
 
 ######################################################################################
 # Boost Library
@@ -134,7 +138,14 @@ add_subdirectory(src/ext/google/benchmark)
 include_directories(src/ext/google/benchmark/src ${CMAKE_SOURCE_DIR}/src/ext/google/benchmark)
 
 add_executable(${PROJECT_CODE_NAME}_tests ${TEST_SOURCE})
-target_link_libraries(${PROJECT_CODE_NAME}_tests ${PROJECT_CODE_NAME}_library gtest benchmark::benchmark)
+target_link_libraries(${PROJECT_CODE_NAME}_tests
+                      ${PROJECT_CODE_NAME}_library
+                      gtest benchmark::benchmark
+                      ${Boost_STACKTRACE_BASIC_LIBRARY}
+                      ${Boost_STACKTRACE_BACKTRACE_LIBRARY}
+                      ${Boost_STACKTRACE_ADDR2LINE_LIBRARY}
+                      ${Boost_STACKTRACE_NOOP_LIBRARY}
+                      pthread dl)
 
 ######################################################################################
 # Adding CMAKE Test
