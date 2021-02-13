@@ -4,10 +4,39 @@
 
 namespace DFL {
 
-Camera::Camera(Point look_from, Point look_at, double vertical_field_of_view,
-               Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance)
+Camera::Camera()
 {
+    double aspect_ratio = 16.0 / 9.0;
+    double aperture = 2.0;
+    double vertical_field_of_view = 20.0;
+
+    Point look_from{ 3.0, 3.0, 2.0 };
+    Point look_at{ 0.0, 0.0, -1.0 };
+    Vector view_up_vector{ 0.0, 1.0, 0.0 };
+    double focus_distance = 30.0;
+
     initialize_camera(look_from, look_at, focus_distance, vertical_field_of_view, view_up_vector, aspect_ratio, aperture);
+}
+
+Camera::Camera(Point look_from, Point look_at,
+               Vector view_up_vector, double vertical_field_of_view,
+               double aspect_ratio, double aperture, double focus_distance)
+{
+    auto theta{ DFL::degrees_to_radians(vertical_field_of_view) };
+    auto h{ theta / 2 };
+    auto viewport_height = 2.0 * h;
+    auto viewport_width = aspect_ratio * viewport_height;
+
+    w = DFL::normalize(look_from - look_at);
+    u = DFL::normalize(DFL::cross(view_up_vector, w));
+    v = DFL::cross(w, u);
+
+    origin = look_from;
+    horizontal = focus_distance * viewport_width * u;
+    vertical = focus_distance * viewport_height * v;
+    lower_left_corner = origin - horizontal/2 - vertical/2 - focus_distance * w;
+
+    lens_radius = aperture / 2;
 }
 
 void Camera::initialize_camera(Point look_from, Point look_at, double focus_distance, double vertical_field_of_view,
@@ -92,20 +121,6 @@ Color Camera::ray_color(const Ray& ray) noexcept
 void Camera::set_camera_direction(const Point &look_from, const Point &look_at, double vertical_field_of_view) noexcept
 {
     initialize_camera(look_from, look_at, vertical_field_of_view);
-}
-
-Camera *create_camera() noexcept
-{
-    double aspect_ratio = 16.0 / 9.0;
-    double distance_to_focus = 70.0;
-    double aperture = 2.0;
-    double vertical_field_of_view = 20.0;
-
-    Point look_from{ 3.0, 3.0, 2.0 };
-    Point look_at{ 0.0, 0.0, -1.0 };
-    Vector vup{ 0.0, 1.0, 0.0 };
-
-    return new Camera{ look_from, look_at, vertical_field_of_view, vup, aspect_ratio, aperture, distance_to_focus };
 }
 
 } // namespace DFL

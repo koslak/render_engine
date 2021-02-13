@@ -113,9 +113,18 @@ void Render_thread::set_scene() noexcept
 {
     world = scene->create_world(Scene::Type::Advanced);
 
+    const auto aspect_ratio = 16.0 / 9.0;
     Point look_from{ 3.0, 3.0, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
-    camera->set_camera_direction(look_from, look_at, 70);
+    DFL::Vector3d<double> vup{ 0.0, 1.0, 0.0 };
+    auto distance_to_focus = (look_from - look_at).length();
+    auto aperture{ 2.0 };
+    double vertical_field_of_view{ 50.0 };
+
+    camera->set_camera_direction(look_from, look_at, 50);
+    DFL::Camera *camera = new Camera{ look_from, look_at, vup, vertical_field_of_view, aspect_ratio, aperture, distance_to_focus };
+
+    this->camera = camera;
 
     samples_per_pixel = 1;
     max_depth = 5;

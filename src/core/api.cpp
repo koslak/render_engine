@@ -15,7 +15,7 @@ Render_options::Render_options()
 
 std::unique_ptr<Camera> Render_options::make_camera()
 {
-    Camera *camera = create_camera();
+    Camera *camera = new Camera;
     return std::unique_ptr<Camera>(camera);
 }
 

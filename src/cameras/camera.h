@@ -8,8 +8,10 @@ namespace DFL {
 class Camera
 {
 public:
-    Camera(Point look_from, Point look_at, double vertical_field_of_view,
-           Vector view_up_vector, double aspect_ratio, double aperture, double focus_distance);
+    Camera();
+    Camera(Point look_from, Point look_at,
+           Vector view_up_vector, double vertical_field_of_view,
+           double aspect_ratio, double aperture, double focus_distance);
 
     void initialize_camera(Point look_from, Point look_at,
                            double focus_distance,
