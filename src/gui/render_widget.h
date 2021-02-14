@@ -23,14 +23,19 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *eventMove) override;
+    virtual void mousePressEvent(QMouseEvent *eventPress) override;
+    virtual void wheelEvent(QWheelEvent *wheelEvent) override;
 
 signals:
     void update_gui(int progress);
     void render_image_finished();
 
 private slots:
-    void update_image(const QImage &image, int progress);
-    void finished_rendering_image();
+    void update_image(const QImage &image, int progress) noexcept;
+    void finished_rendering_image() noexcept;
+    void zoom_in() noexcept;
+    void zoom_out() noexcept;
 
 private:
     std::unique_ptr<Render_thread> render_thread;
@@ -41,6 +46,8 @@ private:
     QPixmap pixmap;
     uint32_t image_width{ 1 };
     uint32_t image_height{ 1 };
+
+    double zoom_delta{ 0.0 };
 };
 
 #endif // RENDER_WIDGET_H

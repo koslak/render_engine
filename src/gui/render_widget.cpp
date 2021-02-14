@@ -5,10 +5,12 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QPixmap>
+#include <QPoint>
 
 #include <memory>
 
 #include "core/api.h"
+#include "core/dfl.h"
 #include "core/geometry.h"
 #include "core/render_thread.h"
 #include "core/scene.h"
@@ -54,7 +56,47 @@ void Render_widget::resizeEvent(QResizeEvent *event)
     pixmap = QPixmap::fromImage(resized_image);
 }
 
-void Render_widget::update_image(const QImage &image, int progress)
+void Render_widget::mouseMoveEvent(QMouseEvent *eventMove)
+{
+
+}
+
+void Render_widget::mousePressEvent(QMouseEvent *eventPress)
+{
+
+}
+
+void Render_widget::wheelEvent(QWheelEvent *wheelEvent)
+{
+    QPoint angle_delta{ wheelEvent->angleDelta() };
+    qDebug() << "angle_delta" << angle_delta;
+    if (angle_delta.y() < 0)
+    {
+        zoom_out();
+    } else{
+        zoom_in();
+    }
+}
+
+void Render_widget::zoom_in() noexcept
+{
+    zoom_delta = DFL::clamp(zoom_delta * 1.25, 0.05, 20.0);
+    qDebug() << "Zoom in" << zoom_delta;
+
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
+//    update();
+}
+
+void Render_widget::zoom_out() noexcept
+{
+    zoom_delta = DFL::clamp(zoom_delta / 1.25, 0.05, 20.0);
+    qDebug() << "Zoom out" << zoom_delta;
+
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
+//    update();
+}
+
+void Render_widget::update_image(const QImage &image, int progress) noexcept
 {
     pixmap = QPixmap::fromImage(image);
 
@@ -65,10 +107,11 @@ void Render_widget::update_image(const QImage &image, int progress)
 
 void Render_widget::start_render_image() noexcept
 {
-    render_thread->render(image_width, image_height, scene.get(), camera.get());
+    double zoom_delta{ 0.0 };
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
 }
 
-void Render_widget::finished_rendering_image()
+void Render_widget::finished_rendering_image() noexcept
 {
     emit render_image_finished();
 }
