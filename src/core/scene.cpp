@@ -31,7 +31,12 @@ std::unique_ptr<Hittable> Scene::create_world(Scene::Type scene_type) noexcept
 
 std::unique_ptr<Hittable> Scene::create_basic_world() noexcept
 {
-    Hittable *world = new Hittable_list;
+    Hittable_list *world = new Hittable_list;
+
+    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
+    auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+    world->add(make_shared<Sphere>(Point( 0.0, -100.5, -1.0), 100.0, material_ground));
+    world->add(make_shared<Sphere>(Point( 0.0,    0.0, -1.0),   0.5, material_center));
 
     return std::unique_ptr<Hittable>(world);
 }
