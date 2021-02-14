@@ -35,8 +35,12 @@ std::unique_ptr<Hittable> Scene::create_basic_world() noexcept
 
     auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
     auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
+    auto material_malva   = std::make_shared<Lambertian>(Color(0.2, 0.0, 0.5));
+    auto material_dark   = std::make_shared<Lambertian>(Color(0.3, 0.0, 0.0));
     world->add(make_shared<Sphere>(Point( 0.0, -100.5, -1.0), 100.0, material_ground));
     world->add(make_shared<Sphere>(Point( 0.0,    0.0, -1.0),   0.5, material_center));
+    world->add(make_shared<Sphere>(Point( 0.0,    0.2,  0.2),   0.2, material_malva));
+    world->add(make_shared<Sphere>(Point( 1.3,   -0.2, -0.4),   0.2, material_dark));
 
     return std::unique_ptr<Hittable>(world);
 }

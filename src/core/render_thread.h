@@ -26,7 +26,7 @@ public:
     Render_thread(QObject *parent = nullptr);
     ~Render_thread();
 
-    void render(uint32_t image_width, uint32_t image_height, DFL::Scene *scene_var, DFL::Camera *camera_var, double zoom_delta);
+    void render(uint32_t image_width, uint32_t image_height, DFL::Scene *scene_var, DFL::Camera *camera_var, double pan_x, double pan_y, double zoom_delta);
 
 signals:
     void rendered_image_progress(const QImage &image, int progress);
@@ -48,7 +48,7 @@ private:
     DFL::Scene *scene;
     DFL::Camera *camera;
 
-    void set_scene(double zoom_delta) noexcept;
+    void set_scene(double pan_x, double pan_y, double zoom_delta) noexcept;
     DFL::Color ray_color(const DFL::Ray &ray, Hittable *world, int depth) noexcept;
     QRgb gamma_correction(const DFL::Color pixel_color, int samples_per_pixel) const noexcept;
 

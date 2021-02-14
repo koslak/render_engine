@@ -23,8 +23,9 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *eventMove) override;
+    virtual void mouseMoveEvent(QMouseEvent *mouse_event) override;
     virtual void mousePressEvent(QMouseEvent *eventPress) override;
+    virtual void mouseReleaseEvent(QMouseEvent *eventPress) override;
     virtual void wheelEvent(QWheelEvent *wheelEvent) override;
 
 signals:
@@ -48,6 +49,9 @@ private:
     uint32_t image_height{ 1 };
 
     double zoom_delta{ 0.0 };
+    QPoint initial_mouse_position;
+    QPoint last_mouse_position;
+    double pan_X, pan_Y;
 };
 
 #endif // RENDER_WIDGET_H

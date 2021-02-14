@@ -35,7 +35,7 @@ Render_thread::~Render_thread()
     wait();
 }
 
-void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *scene_var, Camera *camera_var, double zoom_delta)
+void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *scene_var, Camera *camera_var, double pan_x, double pan_y, double zoom_delta)
 {
     QMutexLocker mutex_locker(&mutex);
 
@@ -45,7 +45,7 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *s
     this->image_width = image_width;
     this->image_height = image_height;
 
-    set_scene(zoom_delta);
+    set_scene(pan_x, pan_y, zoom_delta);
 
     if(!isRunning())
     {
@@ -109,10 +109,10 @@ QRgb Render_thread::gamma_correction(const Color pixel_color, int samples_per_pi
                 static_cast<int>(256 * DFL::clamp(b, 0.0, 0.999)));
 }
 
-void Render_thread::set_scene(double zoom_delta) noexcept
+void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_delta) noexcept
 {
-    world = scene->create_world(Scene::Type::Basic);
-    Point look_from{ 3.0, 3.0, 2.0 };
+    world = scene->create_world(Scene::Type::Advanced);
+    Point look_from{ 2.0, 2.0, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
 
     if(zoom_delta > 0.0)
@@ -121,8 +121,7 @@ void Render_thread::set_scene(double zoom_delta) noexcept
     }else{
         look_from.x -= zoom_delta;
     }
-//    Point look_from{ 11.0, 2.0, 3.0 };
-//    Point look_at{ 0.0, 0.0, 0.0 };
+
     double focus_distance{ 10.0 };
     double aperture{ 0.1 };
 

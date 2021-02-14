@@ -56,20 +56,28 @@ void Render_widget::resizeEvent(QResizeEvent *event)
     pixmap = QPixmap::fromImage(resized_image);
 }
 
-void Render_widget::mouseMoveEvent(QMouseEvent *eventMove)
+void Render_widget::mouseMoveEvent(QMouseEvent *mouse_event)
 {
-
+    pan_X += (mouse_event->pos().x() - last_mouse_position.x())/(zoom_delta * 100);
+    pan_Y += (mouse_event->pos().y() - last_mouse_position.y())/(zoom_delta * 100);
+    last_mouse_position = mouse_event->pos();
 }
 
 void Render_widget::mousePressEvent(QMouseEvent *eventPress)
 {
+    initial_mouse_position = eventPress->pos();
+    qDebug() << "Initial mouse position" << initial_mouse_position;
+}
 
+void Render_widget::mouseReleaseEvent(QMouseEvent *eventPress)
+{
+    last_mouse_position = eventPress->pos();
+    qDebug() << "Last mouse position" << last_mouse_position;
 }
 
 void Render_widget::wheelEvent(QWheelEvent *wheelEvent)
 {
     QPoint angle_delta{ wheelEvent->angleDelta() };
-    qDebug() << "angle_delta" << angle_delta;
     if (angle_delta.y() < 0)
     {
         zoom_out();
@@ -80,20 +88,16 @@ void Render_widget::wheelEvent(QWheelEvent *wheelEvent)
 
 void Render_widget::zoom_in() noexcept
 {
-    zoom_delta = DFL::clamp(zoom_delta * 1.25, 0.05, 20.0);
-    qDebug() << "Zoom in" << zoom_delta;
-
-    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
-//    update();
+//    zoom_delta = DFL::clamp(zoom_delta * 1.25, 0.05, 20.0);
+    zoom_delta += 0.5;
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 
 void Render_widget::zoom_out() noexcept
 {
-    zoom_delta = DFL::clamp(zoom_delta / 1.25, 0.05, 20.0);
-    qDebug() << "Zoom out" << zoom_delta;
-
-    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
-//    update();
+    zoom_delta -= 0.5;
+    zoom_delta = DFL::clamp(zoom_delta, 0.0, 20.0);
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 
 void Render_widget::update_image(const QImage &image, int progress) noexcept
@@ -108,7 +112,9 @@ void Render_widget::update_image(const QImage &image, int progress) noexcept
 void Render_widget::start_render_image() noexcept
 {
     double zoom_delta{ 0.0 };
-    render_thread->render(image_width, image_height, scene.get(), camera.get(), zoom_delta);
+    double pan_X{ 0.0 };
+    double pan_Y{ 0.0 };
+    render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 
 void Render_widget::finished_rendering_image() noexcept
