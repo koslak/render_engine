@@ -50,16 +50,16 @@ std::unique_ptr<Hittable> Scene::create_advanced_world() noexcept
     Hittable_list *world = new Hittable_list;
 
     auto material_ground = std::make_shared<Lambertian>(Color(0.7, 0.7, 0.7));
-    auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
-    auto material_left   = std::make_shared<Metal>(Color(0.1, 0.1, 0.1), 0.0);
-    auto material_right  = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
-    auto material_dielectric = std::make_shared<Dielectric>(1.5);
+    auto material_cristal = std::make_shared<Dielectric>(1.5);
+    auto material_metal   = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
+    auto material_copper  = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.3);
+    auto material_difuse  = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
 
     world->add(std::make_shared<Sphere>(Point( 0.0, -100.5, -1.0), 100.0, material_ground));
-    world->add(std::make_shared<Sphere>(Point( 0.0,    0.0, -1.0),   0.5, material_center));
-    world->add(std::make_shared<Sphere>(Point(-1.0,    0.0, -1.0),   0.5, material_left));
-    world->add(std::make_shared<Sphere>(Point( 1.0,    0.0, -1.0),   0.5, material_right));
-    world->add(std::make_shared<Sphere>(Point( 0.7,    0.0,  0.0),   0.2, material_dielectric));
+    world->add(std::make_shared<Sphere>(Point( 0.3,    0.0, -0.5),  0.45, material_cristal));
+    world->add(std::make_shared<Sphere>(Point(-1.0,    0.2, -1.1),   0.7, material_metal));
+    world->add(std::make_shared<Sphere>(Point( 1.2,    0.0, -1.6),   0.5, material_copper));
+    world->add(std::make_shared<Sphere>(Point(-0.5,   -0.3, -0.5),   0.2, material_difuse));
 
     return std::unique_ptr<Hittable>(world);
 }
