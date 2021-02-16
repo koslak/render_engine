@@ -29,7 +29,9 @@ int main(int argc, char *argv[])
     {
         if(screen)
         {
-            bool is_screen_name_strings_equal = QString::compare(screen->name(), QGuiApplication::primaryScreen()->name(), Qt::CaseInsensitive);
+            int strings_comparison_result{ QString::compare(screen->name(), QGuiApplication::primaryScreen()->name(), Qt::CaseInsensitive) };
+            bool is_screen_name_strings_equal{ true ? strings_comparison_result == 0 : false };
+
             if(is_screen_name_strings_equal)
             {
                 window_size.setSize(screen->geometry().size());
