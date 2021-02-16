@@ -1,6 +1,6 @@
 [submodule "src/ext/google/googletest"]
 	path = src/ext/google/googletest
-	url = git://github.com/koslak/horus_render.git
+	url = https://github.com/koslak/horus_render.git
 [submodule "src/ext/google/benchmark"]
 	path = src/ext/google/benchmark
-	url = git://github.com/koslak/horus_render.git
+	url = https://github.com/koslak/horus_render.git
