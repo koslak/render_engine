@@ -115,20 +115,18 @@ void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_de
     Point look_from{ 0.5, 0.8, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
 
-    if(zoom_delta > 0.0)
-    {
-        look_from.x += zoom_delta;
-    }else{
-        look_from.x -= zoom_delta;
-    }
+    Vector camera_direction = DFL::normalize(look_from - look_at);
+    Point point_after_zoom = { look_from + camera_direction * zoom_delta };
+
+    look_from = point_after_zoom;
 
     double focus_distance{ 10.0 };
     double aperture{ 0.03 };
 
     camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
 
-    samples_per_pixel = 500;
-    max_depth = 50;
+    samples_per_pixel = 1;
+    max_depth = 3;
 }
 
 // The function body is an infinite loop which starts by storing the rendering parameters
