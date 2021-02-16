@@ -33,7 +33,7 @@ std::unique_ptr<Hittable> Scene::create_basic_world() noexcept
 {
     Hittable_list *world = new Hittable_list;
 
-    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.4, 0.0));
+    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
     auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
     auto material_malva   = std::make_shared<Lambertian>(Color(0.2, 0.0, 0.5));
     auto material_dark   = std::make_shared<Lambertian>(Color(0.3, 0.0, 0.0));
@@ -49,7 +49,7 @@ std::unique_ptr<Hittable> Scene::create_advanced_world() noexcept
 {
     Hittable_list *world = new Hittable_list;
 
-    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.6, 0.0));
+    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
     auto material_center = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
     auto material_left   = std::make_shared<Metal>(Color(0.8, 0.8, 0.8), 0.0);
     auto material_right  = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
