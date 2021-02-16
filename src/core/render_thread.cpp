@@ -112,7 +112,7 @@ QRgb Render_thread::gamma_correction(const Color pixel_color, int samples_per_pi
 void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_delta) noexcept
 {
     world = scene->create_world(Scene::Type::Advanced);
-    Point look_from{ 2.0, 2.0, 2.0 };
+    Point look_from{ 0.5, 0.8, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
 
     if(zoom_delta > 0.0)
@@ -128,7 +128,7 @@ void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_de
     camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
 
     samples_per_pixel = 1;
-    max_depth = 3;
+    max_depth = 5;
 }
 
 // The function body is an infinite loop which starts by storing the rendering parameters
