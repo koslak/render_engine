@@ -28,7 +28,7 @@ bool Hittable_list::hit(const DFL::Ray &ray, double t_min, double t_max, Hit_rec
 
     for(const auto &object : objects_vector)
     {
-        if(object->hit(ray, t_min, closest_so_far, temporal_hit_record))
+        if(object != nullptr && object->hit(ray, t_min, closest_so_far, temporal_hit_record))
         {
             is_hit_anything = true;
             closest_so_far = temporal_hit_record.t;
