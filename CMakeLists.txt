@@ -81,6 +81,10 @@ file(GLOB TEST_SOURCE
 
 include_directories(src)
 
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
 ######################################################################################
 # Source code static library
 ######################################################################################
@@ -113,8 +117,33 @@ target_link_libraries(${PROJECT_CODE_NAME}_executable            # target
 ######################################################################################
 # Boost Library
 ######################################################################################
-set(BOOST_ROOT "/usr/include/boost")
-include_directories(include)
+find_package(Boost 1.75.0)
+
+if(${Boost_FOUND})
+    message(STATUS "---------------------")
+    message(STATUS "Boost library found")
+
+    if(LINUX)
+        #set(BOOST_ROOT "/usr/include/boost")
+        set(BOOST_ROOT ${Boost_INCLUDE_DIRS})
+        include_directories(include)
+    endif()
+
+    if(APPLE)
+        set(BOOST_ROOT ${Boost_INCLUDE_DIRS})
+        include_directories(${Boost_INCLUDE_DIRS})
+
+        #flag required to use Boost Stacktrace in Apple's platform.
+        add_compile_definitions("_GNU_SOURCE")
+    endif()
+
+    message(STATUS "Setting BOOST_ROOT to: " ${BOOST_ROOT})
+    message(STATUS "Setting Boost_INCLUDE_DIRS to: " ${Boost_INCLUDE_DIRS})
+    message(STATUS "---------------------")
+elseif()
+    message(FATAL_ERROR "The Boost library has not being found.")
+
+endif()
 
 ######################################################################################
 # Google Test Framework
