@@ -123,12 +123,12 @@ void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_de
     }
 
     double focus_distance{ 10.0 };
-    double aperture{ 0.1 };
+    double aperture{ 0.03 };
 
     camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
 
-    samples_per_pixel = 1;
-    max_depth = 5;
+    samples_per_pixel = 500;
+    max_depth = 50;
 }
 
 // The function body is an infinite loop which starts by storing the rendering parameters
