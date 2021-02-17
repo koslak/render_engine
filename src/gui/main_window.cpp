@@ -10,44 +10,6 @@
 #include <QHBoxLayout>
 #include <QTimer>
 
-Status_bar_widget::Status_bar_widget(QWidget *parent) : QWidget(parent)
-{
-    status_bar_label = new QLabel{ this };
-    hours_label = new QLabel{ this };
-    minutes_label = new QLabel{ this };
-    seconds_label = new QLabel{ this };
-    milliseconds_label = new QLabel{ this };
-    milliseconds_label->setMinimumWidth(50);
-    milliseconds_label->setMaximumWidth(50);
-
-    QSpacerItem *spacer_item{ new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding) };
-
-    QHBoxLayout *horizontal_layout = new QHBoxLayout;
-    horizontal_layout->addItem(spacer_item);
-    horizontal_layout->addWidget(status_bar_label);
-    horizontal_layout->addWidget(hours_label);
-    horizontal_layout->addWidget(minutes_label);
-    horizontal_layout->addWidget(seconds_label);
-    horizontal_layout->addWidget(milliseconds_label);
-
-    this->setLayout(horizontal_layout);
-}
-
-constexpr void Status_bar_widget::set_status_bar_text(const QString &text) noexcept
-{
-    status_bar_label->setText(text);
-    milliseconds_label->setText("");
-}
-
-void Status_bar_widget::update_status_bar_timer(const QString &hour, const QString &minutes, const QString &seconds, const QString &milliseconds)
-{
-    status_bar_label->setText("Elapsed Time: ");
-    hours_label->setText(hour);
-    minutes_label->setText(minutes);
-    seconds_label->setText(seconds);
-    milliseconds_label->setText(milliseconds);
-}
-
 Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{new QProgressBar(this)},
                                                                  render_button{new QPushButton("Start Rendering")},
                                                                  render_widget{new Render_widget(this)}
@@ -59,8 +21,8 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
 
     QWidget *central_widget = new QWidget{this};
     status_bar_label = new QLabel{this};
-    status_bar_label->setMinimumWidth(170);
-    status_bar_label->setMaximumWidth(170);
+    status_bar_label->setMinimumWidth(250);
+    status_bar_label->setMaximumWidth(250);
     milliseconds_label = new QLabel{this};
 
     QVBoxLayout *vertical_layout = new QVBoxLayout;
@@ -68,7 +30,6 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
     vertical_layout->addWidget(render_button);
     vertical_layout->addWidget(progress_bar);
 
-    status_bar_widget = new Status_bar_widget{ this };
     statusBar()->addPermanentWidget(status_bar_label);
 
     QObject::connect(render_widget, &Render_widget::update_gui, this, &Main_window::update_gui);
@@ -101,21 +62,12 @@ QString Main_window::format_time(qint64 elapsed_time_in_ms) const noexcept
                          QString( "%1" ).arg(seconds, 2, 10, QLatin1Char('0')) + ":" +
                          QString( "%1" ).arg(milliseconds, 3, 10, QLatin1Char('0')));
 
-    /*
-    status_bar_widget->update_status_bar_timer(QString("%1").arg(hours, 2, 10, QLatin1Char('0')),
-                                               QString( "%1" ).arg(minutes, 2, 10, QLatin1Char('0')),
-                                               QString( "%1" ).arg(seconds, 2, 10, QLatin1Char('0')),
-                                               QString( "%1" ).arg(milliseconds, 3, 10, QLatin1Char('0')));
-    */
-
     return formatted_time;
 }
 
 void Main_window::timer_update()
 {
-//    format_time(elapsed_timer->elapsed());
-//    status_bar_widget->set_status_bar_text("Elapsed time: " + format_time(elapsed_timer->elapsed()));
-    status_bar_label->setText("Elapsed time: " + format_time(elapsed_timer->elapsed()));
+    status_bar_label->setText("Rendering time (h:m:s:ss): " + format_time(elapsed_timer->elapsed()));
 }
 
 void Main_window::update_gui(int progress)
