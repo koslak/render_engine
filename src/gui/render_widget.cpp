@@ -78,26 +78,27 @@ void Render_widget::mouseReleaseEvent(QMouseEvent *eventPress)
 void Render_widget::wheelEvent(QWheelEvent *wheelEvent)
 {
     QPoint angle_delta{ wheelEvent->angleDelta() };
+
     if (angle_delta.y() < 0)
     {
         zoom_out();
     } else{
         zoom_in();
     }
+
+    emit start_render_by_mouse_action();
 }
 
 void Render_widget::zoom_in() noexcept
 {
 //    zoom_delta = DFL::clamp(zoom_delta * 1.25, 0.05, 20.0);
     zoom_delta += 0.5;
-    render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 
 void Render_widget::zoom_out() noexcept
 {
     zoom_delta -= 0.5;
     zoom_delta = DFL::clamp(zoom_delta, 0.0, 20.0);
-    render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 
 void Render_widget::update_image(const QImage &image, int progress) noexcept
@@ -111,9 +112,6 @@ void Render_widget::update_image(const QImage &image, int progress) noexcept
 
 void Render_widget::start_render_image() noexcept
 {
-    double zoom_delta{ 0.0 };
-    double pan_X{ 0.0 };
-    double pan_Y{ 0.0 };
     render_thread->render(image_width, image_height, scene.get(), camera.get(), pan_X, pan_Y, zoom_delta);
 }
 

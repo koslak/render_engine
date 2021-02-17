@@ -2,6 +2,7 @@
 
 #include "render_widget.h"
 
+#include <QDebug>
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
@@ -34,6 +35,7 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
 
     QObject::connect(render_widget, &Render_widget::update_gui, this, &Main_window::update_gui);
     QObject::connect(render_widget, &Render_widget::render_image_finished, this, &Main_window::render_image_finished);
+    QObject::connect(render_widget, &Render_widget::start_render_by_mouse_action, this, &Main_window::render_button_clicked);
     QObject::connect(render_button, &QPushButton::clicked, this, &Main_window::render_button_clicked);
     QObject::connect(timer, &QTimer::timeout, this, &Main_window::timer_update);
 
@@ -43,7 +45,7 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
 
 void Main_window::render_button_clicked()
 {
-    elapsed_timer->start();
+    elapsed_timer->restart();
     timer->start(1);
     render_widget->start_render_image();
 }
@@ -79,16 +81,3 @@ void Main_window::render_image_finished()
 {
     timer->stop();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

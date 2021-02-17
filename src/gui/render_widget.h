@@ -31,6 +31,7 @@ protected:
 signals:
     void update_gui(int progress);
     void render_image_finished();
+    void start_render_by_mouse_action();
 
 private slots:
     void update_image(const QImage &image, int progress) noexcept;
