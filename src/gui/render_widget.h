@@ -52,7 +52,7 @@ private:
     double zoom_delta{ 0.0 };
     QPoint initial_mouse_position;
     QPoint last_mouse_position;
-    double pan_X, pan_Y;
+    double pan_X{ 0.0 }, pan_Y{ 0.0 };
 };
 
 #endif // RENDER_WIDGET_H

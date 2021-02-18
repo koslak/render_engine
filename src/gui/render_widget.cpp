@@ -58,9 +58,10 @@ void Render_widget::resizeEvent(QResizeEvent *event)
 
 void Render_widget::mouseMoveEvent(QMouseEvent *mouse_event)
 {
-    pan_X += (mouse_event->pos().x() - last_mouse_position.x())/(zoom_delta * 100);
-    pan_Y += (mouse_event->pos().y() - last_mouse_position.y())/(zoom_delta * 100);
+//    pan_X += (mouse_event->pos().x() - last_mouse_position.x()); ///(zoom_delta * 100);
+//    pan_Y += (mouse_event->pos().y() - last_mouse_position.y()); ///(zoom_delta * 100);
     last_mouse_position = mouse_event->pos();
+
 }
 
 void Render_widget::mousePressEvent(QMouseEvent *eventPress)
@@ -73,6 +74,18 @@ void Render_widget::mouseReleaseEvent(QMouseEvent *eventPress)
 {
     last_mouse_position = eventPress->pos();
     qDebug() << "Last mouse position" << last_mouse_position;
+    pan_X = (last_mouse_position.x() - initial_mouse_position.x()); ///(zoom_delta * 100);
+    pan_Y = (last_mouse_position.y() - initial_mouse_position.y()); ///(zoom_delta * 100);
+
+    /*
+    double alpha{ std::atan(pan_X/(2 * 40.0)) * 180/M_PI };
+    qDebug() << "pan_X" << pan_X;
+    qDebug() << "pan_Y" << pan_Y;
+    qDebug() << "alpha" << alpha;
+    qDebug() << "PI" << M_PI;
+    */
+    emit start_render_by_mouse_action();
+
 }
 
 void Render_widget::wheelEvent(QWheelEvent *wheelEvent)

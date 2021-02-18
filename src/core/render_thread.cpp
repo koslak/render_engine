@@ -6,6 +6,7 @@
 #include "core/scene.h"
 #include "core/material.h"
 
+#include <QDebug>
 #include <QImage>
 
 using namespace DFL;
@@ -56,22 +57,52 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *s
     }
 }
 
-void Render_thread::set_scene(double /*pan_x*/, double /*pan_y*/, double zoom_delta) noexcept
+void Render_thread::set_scene(double pan_X, double /*pan_Y*/, double zoom_delta) noexcept
 {
     world = scene->create_world(Scene::Type::Advanced);
     Point look_from{ 0.5, 0.8, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
 
+    /*
     Vector camera_direction = DFL::normalize(look_from - look_at);
     Point point_after_zoom = { look_from + camera_direction * zoom_delta };
 
     look_from = point_after_zoom;
+    */
 
     double focus_distance{ 10.0 };
     double aperture{ 0.03 };
 
-    camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
 
+    double alpha_new{ std::atan(pan_X/(2 * 40.0)) }; // * 180/M_PI };
+
+    if(alpha != alpha_new)
+    {
+        alpha += alpha_new;
+        if(alpha >= (M_PI))
+        {
+            alpha = 0;
+        }
+        double rho_0{ look_from.length() };
+        double phi_0{ std::acos(look_from.z / rho_0) };
+
+        double x_1{ rho_0 * std::sin(phi_0) * std::cos(alpha) };
+        double y_1{ rho_0 * std::sin(phi_0) * std::sin(alpha) };
+        double z_1{ rho_0 * std::cos(phi_0) };
+
+        Point point_after_rotation{ x_1, y_1, z_1 };
+
+        qDebug() << "alpha radians" << alpha;
+        qDebug() << "alpha degrees" << alpha * 180/M_PI;
+        qDebug() << "zoom_delta" << zoom_delta;
+        qDebug() << "look_from_0" << look_from.x << look_from.y << look_from.z;
+        look_from = point_after_rotation;
+        qDebug() << "look_from_1" << look_from.x << look_from.y << look_from.z;
+        qDebug() << "\n";
+        qDebug() << "\n";
+    }
+
+    camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
     samples_per_pixel = 2;
     max_depth = 5;
 }
