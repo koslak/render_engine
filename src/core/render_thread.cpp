@@ -60,7 +60,6 @@ void Render_thread::render(uint32_t image_width, uint32_t image_height, Scene *s
 void Render_thread::set_scene(double pan_X, double /*pan_Y*/, double zoom_delta) noexcept
 {
     world = scene->create_world(Scene::Type::Advanced);
-    Point look_from{ 0.5, 0.8, 2.0 };
     Point look_at{ 0.0, 0.0, -1.0 };
 
     /*
@@ -73,38 +72,91 @@ void Render_thread::set_scene(double pan_X, double /*pan_Y*/, double zoom_delta)
     double focus_distance{ 10.0 };
     double aperture{ 0.03 };
 
+    double alpha_mouse{ std::atan(pan_X/(2 * 40.0)) }; // * 180/M_PI };
+    alpha_mouse = 90 * M_PI / 180;
 
-    double alpha_new{ std::atan(pan_X/(2 * 40.0)) }; // * 180/M_PI };
+    qDebug() << "alpha_mouse: rad:" << alpha_mouse << "deg:" << alpha_mouse * 180/M_PI;
 
-    if(alpha != alpha_new)
+//    if(alpha != alpha_mouse)
     {
-        alpha += alpha_new;
+        alpha = alpha_mouse;
         if(alpha >= (M_PI))
         {
-            alpha = 0;
+//            alpha = 0;
         }
         double rho_0{ look_from.length() };
-        double phi_0{ std::acos(look_from.z / rho_0) };
+        double phi_0{ std::acos(look_from.y / rho_0) };
+        alpha_0 = std::acos(look_from.z / (rho_0 * std::sin(phi_0)));
+        qDebug() << "rho_0" << rho_0;
+        qDebug() << "phi_0 rad:" << phi_0 << "deg:" << phi_0 * 180/M_PI;
 
-        double x_1{ rho_0 * std::sin(phi_0) * std::cos(alpha) };
-        double y_1{ rho_0 * std::sin(phi_0) * std::sin(alpha) };
-        double z_1{ rho_0 * std::cos(phi_0) };
+//        qDebug() << "alpha_0 original rad:" << alpha_0 << "deg:" << alpha_0 * 180/M_PI;
 
-        Point point_after_rotation{ x_1, y_1, z_1 };
+        double rad_360_const{ (360 * (M_PI / 180)) };
+        double rad_90_const{ (90 * (M_PI / 180)) };
+        double rad_180_const{ (180 * (M_PI / 180)) };
+        double rad_270_const{ (270 * (M_PI / 180)) };
 
-        qDebug() << "alpha radians" << alpha;
-        qDebug() << "alpha degrees" << alpha * 180/M_PI;
-        qDebug() << "zoom_delta" << zoom_delta;
-        qDebug() << "look_from_0" << look_from.x << look_from.y << look_from.z;
-        look_from = point_after_rotation;
-        qDebug() << "look_from_1" << look_from.x << look_from.y << look_from.z;
-        qDebug() << "\n";
+        if(alpha_0 < 0)
+        {
+//            alpha_0 = rad_360_const - std::abs(alpha_0);
+        }
+
+        /*
+        if(alpha_0 < 0 && alpha_0 <= -rad_90_const)
+        {
+            alpha_0 = rad_360_const - std::abs(alpha_0);
+        }
+
+        if(alpha_0 < -rad_90_const && alpha_0 <= -rad_180_const)
+        {
+            alpha_0 = rad_360_const - std::abs(alpha_0);
+        }
+
+        if(alpha_0 < -rad_180_const && alpha_0 <= -rad_270_const)
+        {
+            alpha_0 = rad_360_const - std::abs(alpha_0);
+        }
+
+        if(alpha_0 < -rad_270_const && alpha_0 <= -rad_360_const)
+        {
+            alpha_0 = rad_360_const - std::abs(alpha_0);
+        }
+        */
+
+        alpha_1 = alpha_0 + alpha_mouse;
+        if(alpha_1 < 0)
+        {
+            alpha_1 = rad_360_const - std::abs(alpha_1);
+        }
+//        qDebug() << "rho_0" << rho_0;
+//        qDebug() << "phi_0 rad:" << phi_0 << "deg:" << phi_0 * 180/M_PI;
+        qDebug() << "alpha_0 rad:" << alpha_0 << "deg:" << alpha_0 * 180/M_PI;
+
+        double rho_1{ rho_0 };
+        double phi_1{ phi_0 };
+
+//        qDebug() << "rho_1" << rho_1;
+//        qDebug() << "phi_1 rad:" << phi_1 << "deg:" << phi_1 * 180/M_PI;
+        qDebug() << "alpha_1 rad:" << alpha_1 << "deg:" << alpha_1 * 180/M_PI;
+
+        double r{ rho_1 * std::sin(phi_1) };
+
+        double x_1{ r * std::sin(alpha_1) };
+        double y_1{ rho_1 * std::cos(phi_1) };
+        double z_1{ rho_1 * std::sin(phi_1) * std::cos(alpha_1) };
+
+        Point new_camera_look_from_after_rotation{ x_1, y_1, z_1 };
+
+        qDebug() << "look_from_0: " << look_from.x << " " << look_from.y << " " << look_from.z;
+        look_from = new_camera_look_from_after_rotation;
+        qDebug() << "look_from_1: " << look_from.x << " " << look_from.y << " " << look_from.z;
         qDebug() << "\n";
     }
 
     camera->set_camera_direction(look_from, look_at, focus_distance, aperture);
-    samples_per_pixel = 2;
-    max_depth = 5;
+    samples_per_pixel = 1;
+    max_depth = 3;
 }
 
 

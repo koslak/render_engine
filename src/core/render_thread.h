@@ -55,7 +55,10 @@ private:
     int samples_per_pixel;
     int max_depth;
     std::unique_ptr<Hittable> world;
+    DFL::Point look_from{ 0.0, 1.0, 2.0 };
     double alpha{ 0.0 };
+    double alpha_0;
+    double alpha_1;
 };
 
 #endif // RENDER_THREAD_H
