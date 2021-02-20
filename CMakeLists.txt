@@ -83,6 +83,8 @@ file(GLOB TEST_SOURCE
 
 include_directories(src)
 
+qt5_add_resources(ALL_SRC_CODE resource_file.qrc)
+
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()

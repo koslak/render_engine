@@ -22,6 +22,8 @@ void print_type_name(const T &parameter)
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    Q_INIT_RESOURCE(resource_file);
+
     QRect window_size{ 0, 0, 0, 0 };
 
     const QList<QScreen *> screen_list{QGuiApplication::screens()};
