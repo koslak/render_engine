@@ -1,6 +1,7 @@
 #include "main_window.h"
 
 #include "render_widget.h"
+#include "render_options_widget.h"
 
 #include <QDebug>
 #include <QLabel>
@@ -11,10 +12,12 @@
 #include <QHBoxLayout>
 #include <QTimer>
 
-Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{new QProgressBar(this)},
-                                                                 render_button{new QPushButton("Start Rendering")},
-                                                                 render_widget{new Render_widget(this)}
+Main_window::Main_window(QWidget *parent) : QMainWindow(parent), render_widget{new Render_widget(this)},
+                                                                 render_options_widget{new Render_options_widget(this)}
 {
+    render_button = new QPushButton("Start Rendering");
+    progress_bar = new QProgressBar(this);
+
     elapsed_timer = std::make_unique<QElapsedTimer>();
     timer = new QTimer{this};
 
@@ -26,10 +29,10 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
     status_bar_label->setMaximumWidth(250);
     milliseconds_label = new QLabel{this};
 
-    QVBoxLayout *vertical_layout = new QVBoxLayout;
-    vertical_layout->addWidget(render_widget);
-    vertical_layout->addWidget(render_button);
-    vertical_layout->addWidget(progress_bar);
+    QHBoxLayout *horizontal_layout = new QHBoxLayout;
+    horizontal_layout->addWidget(render_widget);
+    horizontal_layout->addWidget(render_options_widget);
+//    horizontal_layout->addWidget(progress_bar);
 
     statusBar()->addPermanentWidget(status_bar_label);
 
@@ -39,7 +42,7 @@ Main_window::Main_window(QWidget *parent) : QMainWindow(parent), progress_bar{ne
     QObject::connect(render_button, &QPushButton::clicked, this, &Main_window::render_button_clicked);
     QObject::connect(timer, &QTimer::timeout, this, &Main_window::timer_update);
 
-    central_widget->setLayout(vertical_layout);
+    central_widget->setLayout(horizontal_layout);
     this->setCentralWidget(central_widget);
 }
 

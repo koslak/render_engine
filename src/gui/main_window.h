@@ -8,6 +8,7 @@ class QLabel;
 class QPushButton;
 class QProgressBar;
 class Render_widget;
+class Render_options_widget;
 class QTimer;
 
 class Main_window : public QMainWindow
@@ -34,6 +35,7 @@ private:
     QTimer *timer;
 
     Render_widget *render_widget;
+    Render_options_widget *render_options_widget;
 };
 
 #endif // MAIN_WINDOW_H

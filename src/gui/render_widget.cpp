@@ -28,6 +28,9 @@ Render_widget::Render_widget(QWidget *parent) : QWidget(parent)
     render_thread = std::make_unique<Render_thread>();
     render_options = std::make_unique<DFL::Render_options>();
 
+    this->setMinimumWidth(1200);
+    this->setMinimumHeight(700);
+
     connect(render_thread.get(), &Render_thread::rendered_image_progress, this, &Render_widget::update_image);
     connect(render_thread.get(), &Render_thread::finished_rendering_image, this, &Render_widget::finished_rendering_image);
 }

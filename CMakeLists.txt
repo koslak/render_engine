@@ -44,6 +44,7 @@ set(CORE_SOURCE
     src/main/main.cpp
     src/gui/main_window.cpp
     src/gui/render_widget.cpp
+    src/gui/render_options_widget.cpp
     src/core/vector3d.cpp
     src/core/point3d.cpp
     src/core/render_thread.cpp
@@ -55,6 +56,7 @@ set(CORE_SOURCE
 set(CORE_HEADERS
     src/gui/main_window.h
     src/gui/render_widget.h
+    src/gui/render_options_widget.h
     src/core/vector3d.h
     src/core/point3d.h
     src/core/dfl.h
