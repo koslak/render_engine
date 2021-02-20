@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/arrow_reset_button_icon.png</file>
+    </qresource>
+</RCC>
