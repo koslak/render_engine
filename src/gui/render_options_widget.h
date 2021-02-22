@@ -23,13 +23,21 @@ private:
     QPushButton *render_button;
     QGroupBox *camera_group_box;
     QLabel *look_from_label;
+    QLabel *look_at_label;
     QPushButton *look_from_coordinates_reset_button;
+    QPushButton *look_at_coordinates_reset_button;
     QLabel *look_from_x_label;
     QLabel *look_from_y_label;
     QLabel *look_from_z_label;
+    QLabel *look_at_x_label;
+    QLabel *look_at_y_label;
+    QLabel *look_at_z_label;
     QLineEdit *look_from_x_line_edit;
     QLineEdit *look_from_y_line_edit;
     QLineEdit *look_from_z_line_edit;
+    QLineEdit *look_at_x_line_edit;
+    QLineEdit *look_at_y_line_edit;
+    QLineEdit *look_at_z_line_edit;
 
     QVBoxLayout *create_camera_options_gui_elements() noexcept;
 
