@@ -19,11 +19,11 @@ Render_options_widget::Render_options_widget(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout *vertical_layout = new QVBoxLayout;
     vertical_layout->addWidget(camera_group_box);
-    vertical_layout->addWidget(render_button);
     vertical_layout->addWidget(progress_bar);
 
     QSpacerItem *vertical_spacer = new QSpacerItem(0, 1000, QSizePolicy::Expanding, QSizePolicy::Expanding);
     vertical_layout->addItem(vertical_spacer);
+    vertical_layout->addWidget(render_button);
 
     this->setLayout(vertical_layout);
 }
